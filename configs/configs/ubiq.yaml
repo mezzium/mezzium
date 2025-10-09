@@ -1,0 +1,13 @@
+route: /ubiq
+protocol: evm
+chainId: 8
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.octano.dev
+    priority: 1
+  - url: https://pyrus2.ubiqscan.io
+    priority: 1

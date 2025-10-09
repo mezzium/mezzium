@@ -1,0 +1,17 @@
+route: /chiliz
+protocol: evm
+chainId: 88888
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.ankr.com/chiliz
+    priority: 1
+  - url: https://chiliz-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://rpc.chiliz.com
+    priority: 1
+  - url: https://chiliz.publicnode.com
+    priority: 1

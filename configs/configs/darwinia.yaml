@@ -1,0 +1,17 @@
+route: /darwinia
+protocol: evm
+chainId: 46
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.darwinia.network
+    priority: 1
+  - url: https://darwinia-rpc.dcdao.box
+    priority: 1
+  - url: https://darwinia-rpc.dwellir.com
+    priority: 1
+  - url: https://darwinia.rpc.subquery.network/public
+    priority: 1

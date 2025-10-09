@@ -1,0 +1,21 @@
+route: /fraxtal
+protocol: evm
+chainId: 252
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.frax.com
+    priority: 1
+  - url: https://fraxtal.drpc.org
+    priority: 1
+  - url: https://fraxtal.gateway.tenderly.co
+    priority: 1
+  - url: https://node.histori.xyz/fraxtal-mainnet/8ry9f6t9dct1se2hlagxnd9n2a
+    priority: 1
+  - url: https://fraxtal.rpc.grove.city/v1/01fdb492
+    priority: 1
+  - url: https://fraxtal-rpc.publicnode.com
+    priority: 1

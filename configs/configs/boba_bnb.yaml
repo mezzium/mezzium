@@ -1,0 +1,19 @@
+route: /boba_bnb
+protocol: evm
+chainId: 56288
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://bnb.boba.network
+    priority: 1
+  - url: https://replica.bnb.boba.network
+    priority: 1
+  - url: https://boba-bnb.gateway.tenderly.co
+    priority: 1
+  - url: https://gateway.tenderly.co/public/boba-bnb
+    priority: 1
+  - url: https://boba-bnb.drpc.org
+    priority: 1

@@ -1,0 +1,13 @@
+route: /etherlink
+protocol: evm
+chainId: 42793
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://node.mainnet.etherlink.com
+    priority: 1
+  - url: https://rpc.ankr.com/etherlink_mainnet
+    priority: 1

@@ -1,0 +1,29 @@
+route: /filecoin
+protocol: evm
+chainId: 314
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://api.node.glif.io
+    priority: 1
+  - url: https://node.filutils.com/rpc/v1
+    priority: 1
+  - url: https://rpc.ankr.com/filecoin
+    priority: 1
+  - url: https://filecoin.chainup.net/rpc/v1
+    priority: 1
+  - url: https://infura.sftproject.io/filecoin/rpc/v1
+    priority: 1
+  - url: https://api.chain.love/rpc/v1
+    priority: 1
+  - url: https://filecoin.drpc.org
+    priority: 1
+  - url: https://filecoin.lava.build
+    priority: 1
+  - url: https://filecoin-mainnet.chainstacklabs.com/rpc/v1
+    priority: 1
+  - url: https://filfox.info/rpc/v1
+    priority: 1

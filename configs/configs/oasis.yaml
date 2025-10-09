@@ -1,0 +1,13 @@
+route: /oasis
+protocol: evm
+chainId: 42262
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://emerald.oasis.io
+    priority: 1
+  - url: https://1rpc.io/oasis/emerald
+    priority: 1

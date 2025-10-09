@@ -1,0 +1,13 @@
+route: /botanix
+protocol: evm
+chainId: 3637
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.ankr.com/botanix_mainnet
+    priority: 1
+  - url: https://rpc.botanixlabs.com
+    priority: 1

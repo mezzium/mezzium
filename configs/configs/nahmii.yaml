@@ -1,0 +1,11 @@
+route: /nahmii
+protocol: evm
+chainId: 5551
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://l2.nahmii.io
+    priority: 1

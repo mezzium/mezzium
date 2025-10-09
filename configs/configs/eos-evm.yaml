@@ -1,0 +1,11 @@
+route: /eos-evm
+protocol: evm
+chainId: 17777
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://api.evm.eosnetwork.com
+    priority: 1

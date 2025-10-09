@@ -1,0 +1,13 @@
+route: /sophon
+protocol: evm
+chainId: 50104
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.sophon.xyz
+    priority: 1
+  - url: https://rpc-quicknode.sophon.xyz
+    priority: 1

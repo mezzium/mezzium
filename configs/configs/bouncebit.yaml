@@ -1,0 +1,11 @@
+route: /bouncebit
+protocol: evm
+chainId: 6001
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://fullnode-mainnet.bouncebitapi.com
+    priority: 1

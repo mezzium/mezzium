@@ -1,0 +1,11 @@
+route: /reichain
+protocol: evm
+chainId: 55555
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rei-rpc.moonrhythm.io
+    priority: 1

@@ -1,0 +1,17 @@
+route: /rsk
+protocol: evm
+chainId: 30
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mycrypto.rsk.co
+    priority: 1
+  - url: https://public-node.rsk.co
+    priority: 1
+  - url: https://rootstock.drpc.org
+    priority: 1
+  - url: https://rootstock-mainnet.public.blastapi.io
+    priority: 1

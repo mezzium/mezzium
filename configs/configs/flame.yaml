@@ -1,0 +1,11 @@
+route: /flame
+protocol: evm
+chainId: 253368190
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.flame.astria.org
+    priority: 1

@@ -1,0 +1,23 @@
+route: /core
+protocol: evm
+chainId: 1116
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.coredao.org
+    priority: 1
+  - url: https://core.public.infstones.com
+    priority: 1
+  - url: https://1rpc.io/core
+    priority: 1
+  - url: https://rpc.ankr.com/core
+    priority: 1
+  - url: https://core.drpc.org
+    priority: 1
+  - url: https://api.zan.top/core-mainnet
+    priority: 1
+  - url: https://rpc-core.icecreamswap.com
+    priority: 1

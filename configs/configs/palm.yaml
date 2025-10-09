@@ -1,0 +1,15 @@
+route: /palm
+protocol: evm
+chainId: 11297108109
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://palm-mainnet.infura.io/v3/3a961d6501e54add9a41aa53f15de99b
+    priority: 1
+  - url: https://palm-mainnet.public.blastapi.io
+    priority: 1
+  - url: https://palm-mainnet.gateway.tatum.io
+    priority: 1

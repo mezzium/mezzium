@@ -1,0 +1,11 @@
+route: /superposition
+protocol: evm
+chainId: 55244
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.superposition.so
+    priority: 1

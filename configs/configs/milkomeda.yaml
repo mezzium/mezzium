@@ -1,0 +1,11 @@
+route: /milkomeda
+protocol: evm
+chainId: 2001
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc-mainnet-cardano-evm.c1.milkomeda.com
+    priority: 1

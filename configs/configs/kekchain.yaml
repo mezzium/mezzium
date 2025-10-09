@@ -1,0 +1,17 @@
+route: /kekchain
+protocol: evm
+chainId: 420420
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.kekchain.com
+    priority: 1
+  - url: https://rpc2.kekchain.com
+    priority: 1
+  - url: https://kek.interchained.org
+    priority: 1
+  - url: https://kekchain.interchained.org
+    priority: 1

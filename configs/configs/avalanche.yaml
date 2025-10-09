@@ -1,0 +1,51 @@
+route: /avalanche
+protocol: evm
+chainId: 43114
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://api.avax.network/ext/bc/C/rpc
+    priority: 1
+  - url: https://avalanche.public-rpc.com
+    priority: 1
+  - url: https://ava-mainnet.public.blastapi.io/ext/bc/C/rpc
+    priority: 1
+  - url: https://avalancheapi.terminet.io/ext/bc/C/rpc
+    priority: 1
+  - url: https://avalanche-c-chain-rpc.publicnode.com
+    priority: 1
+  - url: https://1rpc.io/avax/c
+    priority: 1
+  - url: https://avalanche-public.nodies.app/ext/bc/C/rpc
+    priority: 1
+  - url: https://avalanche.api.onfinality.io/public/ext/bc/C/rpc
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/avax/mainnet/public
+    priority: 1
+  - url: https://avax.meowrpc.com
+    priority: 1
+  - url: https://api.zan.top/avax-mainnet/ext/bc/C/rpc
+    priority: 1
+  - url: https://avalanche.drpc.org
+    priority: 1
+  - url: https://public.stackup.sh/api/v1/node/avalanche-mainnet
+    priority: 1
+  - url: https://avax-x-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://avalanche-mainnet.gateway.tenderly.co
+    priority: 1
+  - url: https://0xrpc.io/avax
+    priority: 1
+  - url: https://rpc.owlracle.info/avax/70d38ce1826c4a60bb2a8e05a6c8b20f
+    priority: 1
+  - url: https://spectrum-01.simplystaking.xyz/avalanche-mn-rpc/ext/bc/C/rpc
+    priority: 1
+  - url: https://avalanche.therpc.io
+    priority: 1
+  - url: https://rpc.poolz.finance/avalanche
+    priority: 1
+  - url: https://avax.rpc.grove.city/v1/01fdb492
+    priority: 1

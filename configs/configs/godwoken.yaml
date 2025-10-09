@@ -1,0 +1,11 @@
+route: /godwoken
+protocol: evm
+chainId: 71402
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://v1.mainnet.godwoken.io/rpc
+    priority: 1

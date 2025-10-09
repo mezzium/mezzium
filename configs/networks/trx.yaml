@@ -1,0 +1,12 @@
+route: /trx
+protocol: trx
+timeoutMs: 1500
+nodes:
+  - url: https://api.trongrid.io
+    priority: 1
+  - url: https://tron-rpc.publicnode.com
+    priority: 1
+  - url: https://tron-mainnet.gateway.tatum.io/
+    priority: 2
+    headers:
+      x-api-key: ${TATUM_API_KEY}

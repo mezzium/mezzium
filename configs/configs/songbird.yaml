@@ -1,0 +1,25 @@
+route: /songbird
+protocol: evm
+chainId: 19
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://songbird-api.flare.network/ext/C/rpc
+    priority: 1
+  - url: https://rpc.ftso.au/songbird
+    priority: 1
+  - url: https://songbird.solidifi.app/ext/C/rpc
+    priority: 1
+  - url: https://01-gravelines-006-01.rpc.tatum.io/ext/bc/C/rpc
+    priority: 1
+  - url: https://01-vinthill-006-02.rpc.tatum.io/ext/bc/C/rpc
+    priority: 1
+  - url: https://02-tokyo-006-03.rpc.tatum.io/ext/bc/C/rpc
+    priority: 1
+  - url: https://rpc.au.cc/songbird
+    priority: 1
+  - url: https://songbird.enosys.global/ext/C/rpc
+    priority: 1

@@ -1,0 +1,11 @@
+route: /artela
+protocol: evm
+chainId: 11820
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://node-euro.artela.network/rpc
+    priority: 1

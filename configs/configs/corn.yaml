@@ -1,0 +1,15 @@
+route: /corn
+protocol: evm
+chainId: 21000000
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.corn-rpc.com
+    priority: 1
+  - url: https://rpc.ankr.com/corn_maizenet
+    priority: 1
+  - url: https://maizenet-rpc.usecorn.com
+    priority: 1

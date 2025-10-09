@@ -1,0 +1,13 @@
+route: /hoo
+protocol: evm
+chainId: 70
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://http-mainnet.hoosmartchain.com
+    priority: 1
+  - url: https://http-mainnet2.hoosmartchain.com
+    priority: 1

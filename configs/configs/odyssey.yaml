@@ -1,0 +1,11 @@
+route: /odyssey
+protocol: evm
+chainId: 153153
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://node.dioneprotocol.com/ext/bc/D/rpc
+    priority: 1

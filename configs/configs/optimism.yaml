@@ -1,0 +1,63 @@
+route: /optimism
+protocol: evm
+chainId: 10
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.optimism.io
+    priority: 1
+  - url: https://optimism-mainnet.public.blastapi.io
+    priority: 1
+  - url: https://1rpc.io/op
+    priority: 1
+  - url: https://optimism-public.nodies.app
+    priority: 1
+  - url: https://opt-mainnet.g.alchemy.com/v2/demo
+    priority: 1
+  - url: https://optimism.public.blockpi.network/v1/rpc/public
+    priority: 1
+  - url: https://optimism.api.onfinality.io/public
+    priority: 1
+  - url: https://rpc.optimism.gateway.fm
+    priority: 1
+  - url: https://optimism-rpc.publicnode.com
+    priority: 1
+  - url: https://optimism.meowrpc.com
+    priority: 1
+  - url: https://api.zan.top/opt-mainnet
+    priority: 1
+  - url: https://optimism.drpc.org
+    priority: 1
+  - url: https://optimism.gateway.tenderly.co
+    priority: 1
+  - url: https://gateway.tenderly.co/public/optimism
+    priority: 1
+  - url: https://api.stateless.solutions/optimism/v1/demo
+    priority: 1
+  - url: https://public.stackup.sh/api/v1/node/optimism-mainnet
+    priority: 1
+  - url: https://optimism-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://go.getblock.io/e8a75f8dcf614861becfbcb185be6eb4
+    priority: 1
+  - url: https://opt-mainnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/op/mainnet/public
+    priority: 1
+  - url: https://rpc.buildbear.io/esquivelfabian
+    priority: 1
+  - url: https://optimism.lava.build
+    priority: 1
+  - url: https://optimism.rpc.subquery.network/public
+    priority: 1
+  - url: https://0xrpc.io/op
+    priority: 1
+  - url: https://rpc.owlracle.info/opt/70d38ce1826c4a60bb2a8e05a6c8b20f
+    priority: 1
+  - url: https://optimism.therpc.io
+    priority: 1
+  - url: https://optimism.rpc.grove.city/v1/01fdb492
+    priority: 1

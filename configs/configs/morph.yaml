@@ -1,0 +1,13 @@
+route: /morph
+protocol: evm
+chainId: 2818
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.morphl2.io
+    priority: 1
+  - url: https://rpc-quicknode.morphl2.io
+    priority: 1

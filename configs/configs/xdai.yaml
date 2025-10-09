@@ -1,0 +1,49 @@
+route: /xdai
+protocol: evm
+chainId: 100
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.gnosischain.com
+    priority: 1
+  - url: https://xdai-archive.blockscout.com
+    priority: 1
+  - url: https://gnosis-public.nodies.app
+    priority: 1
+  - url: https://rpc.gnosis.gateway.fm
+    priority: 1
+  - url: https://gnosis-mainnet.public.blastapi.io
+    priority: 1
+  - url: https://rpc.ap-southeast-1.gateway.fm/v4/gnosis/non-archival/mainnet
+    priority: 1
+  - url: https://gnosis.api.onfinality.io/public
+    priority: 1
+  - url: https://gnosis.drpc.org
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/gnosis/mainnet/public
+    priority: 1
+  - url: https://gnosis-rpc.publicnode.com
+    priority: 1
+  - url: https://1rpc.io/gnosis
+    priority: 1
+  - url: https://gno-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://0xrpc.io/gno
+    priority: 1
+  - url: https://gnosis.therpc.io
+    priority: 1
+  - url: https://gnosis.rpc.grove.city/v1/01fdb492
+    priority: 1
+  - url: https://rpc.ankr.com/gnosis
+    priority: 1
+  - url: https://gnosischain-rpc.gateway.pokt.network
+    priority: 1
+  - url: https://gnosis.blockpi.network/v1/rpc/public
+    priority: 1
+  - url: https://web3endpoints.com/gnosischain-mainnet
+    priority: 1
+  - url: https://gnosis.oat.farm
+    priority: 1

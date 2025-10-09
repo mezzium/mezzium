@@ -1,0 +1,47 @@
+route: /fantom
+protocol: evm
+chainId: 250
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpcapi.fantom.network
+    priority: 1
+  - url: https://fantom-public.nodies.app
+    priority: 1
+  - url: https://rpc.ftm.tools
+    priority: 1
+  - url: https://rpc.fantom.network
+    priority: 1
+  - url: https://rpc2.fantom.network
+    priority: 1
+  - url: https://rpc3.fantom.network
+    priority: 1
+  - url: https://fantom-mainnet.public.blastapi.io
+    priority: 1
+  - url: https://1rpc.io/ftm
+    priority: 1
+  - url: https://fantom-rpc.publicnode.com
+    priority: 1
+  - url: https://fantom.api.onfinality.io/public
+    priority: 1
+  - url: https://rpc.fantom.gateway.fm
+    priority: 1
+  - url: https://fantom.drpc.org
+    priority: 1
+  - url: https://fantom-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/fantom/mainnet/public
+    priority: 1
+  - url: https://fantom-json-rpc.stakely.io
+    priority: 1
+  - url: https://api.zan.top/ftm-mainnet
+    priority: 1
+  - url: https://rpc.owlracle.info/ftm/70d38ce1826c4a60bb2a8e05a6c8b20f
+    priority: 1
+  - url: https://fantom.therpc.io
+    priority: 1
+  - url: https://fantom.rpc.grove.city/v1/01fdb492
+    priority: 1

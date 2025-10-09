@@ -1,0 +1,29 @@
+route: /zksync-era
+protocol: evm
+chainId: 324
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.era.zksync.io
+    priority: 1
+  - url: https://go.getblock.io/f76c09905def4618a34946bf71851542
+    priority: 1
+  - url: https://zksync.meowrpc.com
+    priority: 1
+  - url: https://zksync.drpc.org
+    priority: 1
+  - url: https://1rpc.io/zksync2-era
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/zksync-era/mainnet/public
+    priority: 1
+  - url: https://api.zan.top/zksync-mainnet
+    priority: 1
+  - url: https://zksync.api.onfinality.io/public
+    priority: 1
+  - url: https://rpc.ankr.com/zksync_era
+    priority: 1
+  - url: https://zksync-era.rpc.grove.city/v1/01fdb492
+    priority: 1

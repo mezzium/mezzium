@@ -1,0 +1,31 @@
+route: /cronos
+protocol: evm
+chainId: 25
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://evm.cronos.org
+    priority: 1
+  - url: https://cronos-rpc.elk.finance
+    priority: 1
+  - url: https://cronos-evm-rpc.publicnode.com
+    priority: 1
+  - url: https://1rpc.io/cro
+    priority: 1
+  - url: https://cronos.drpc.org
+    priority: 1
+  - url: https://rpc.vvs.finance
+    priority: 1
+  - url: https://mmf-rpc.xstaking.sg
+    priority: 1
+  - url: https://rpc.nebkas.ro
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/cronos/mainnet/public
+    priority: 1
+  - url: https://rpc.owlracle.info/cro/70d38ce1826c4a60bb2a8e05a6c8b20f
+    priority: 1
+  - url: https://cro-mainnet.gateway.tatum.io
+    priority: 1

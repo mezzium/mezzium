@@ -1,0 +1,27 @@
+route: /dymension
+protocol: evm
+chainId: 1100
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://jsonrpc.dymension.nodestake.org
+    priority: 1
+  - url: https://rollapp.jrpc.cumulo.com.es
+    priority: 1
+  - url: https://dymension.liquify.com/json-rpc
+    priority: 1
+  - url: https://dymension-evm.kynraze.com
+    priority: 1
+  - url: https://dymension.drpc.org
+    priority: 1
+  - url: https://rpc.mainnet.dymension.aviaone.com
+    priority: 1
+  - url: https://evm.rpc.mainnet.dymension.aviaone.com
+    priority: 1
+  - url: https://dymension-evm.blockpi.network/v1/rpc/public
+    priority: 1
+  - url: https://dymension-evm-rpc.publicnode.com
+    priority: 1

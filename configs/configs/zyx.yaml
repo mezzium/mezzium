@@ -1,0 +1,21 @@
+route: /zyx
+protocol: evm
+chainId: 55
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc-1.zyx.network
+    priority: 1
+  - url: https://rpc-2.zyx.network
+    priority: 1
+  - url: https://rpc-3.zyx.network
+    priority: 1
+  - url: https://rpc-5.zyx.network
+    priority: 1
+  - url: https://rpc-4.zyx.network
+    priority: 1
+  - url: https://rpc-6.zyx.network
+    priority: 1

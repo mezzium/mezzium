@@ -1,0 +1,23 @@
+route: /berachain
+protocol: evm
+chainId: 80094
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.berachain.com
+    priority: 1
+  - url: https://berachain-rpc.publicnode.com
+    priority: 1
+  - url: https://berachain.drpc.org
+    priority: 1
+  - url: https://rpc.berachain-apis.com
+    priority: 1
+  - url: https://berachain.therpc.io
+    priority: 1
+  - url: https://berachain-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://berachain.rpc.grove.city/v1/01fdb492
+    priority: 1

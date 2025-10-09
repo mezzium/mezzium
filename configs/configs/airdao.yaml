@@ -1,0 +1,11 @@
+route: /airdao
+protocol: evm
+chainId: 16718
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://network.ambrosus.io
+    priority: 1

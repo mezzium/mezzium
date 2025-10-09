@@ -1,0 +1,35 @@
+route: /kava
+protocol: evm
+chainId: 2222
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://evm.kava.io
+    priority: 1
+  - url: https://kava.api.onfinality.io/public
+    priority: 1
+  - url: https://kava-evm-rpc.publicnode.com
+    priority: 1
+  - url: https://kava-public.nodies.app
+    priority: 1
+  - url: https://evm.kava.chainstacklabs.com
+    priority: 1
+  - url: https://rpc.ankr.com/kava_evm
+    priority: 1
+  - url: https://evm.kava-rpc.com
+    priority: 1
+  - url: https://kava.drpc.org
+    priority: 1
+  - url: https://node.histori.xyz/kava-mainnet/8ry9f6t9dct1se2hlagxnd9n2a
+    priority: 1
+  - url: https://kava.therpc.io
+    priority: 1
+  - url: https://kava.rpc.grove.city/v1/01fdb492
+    priority: 1
+  - url: https://kava-rpc.gateway.pokt.network
+    priority: 1
+  - url: https://kava-evm.rpc.thirdweb.com
+    priority: 1

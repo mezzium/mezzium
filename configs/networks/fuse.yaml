@@ -1,0 +1,8 @@
+route: /fuse
+protocol: evm
+timeoutMs: 1500
+nodes:
+  - url: https://rpc.fuse.io
+    priority: 1
+    headers:
+      Content-Type: application/json

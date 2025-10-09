@@ -1,0 +1,11 @@
+route: /form-network
+protocol: evm
+chainId: 478
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.form.network/http
+    priority: 1

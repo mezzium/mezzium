@@ -1,0 +1,27 @@
+route: /polygon-zkevm
+protocol: evm
+chainId: 1101
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.polygon-zkevm.gateway.fm
+    priority: 1
+  - url: https://1rpc.io/polygon/zkevm
+    priority: 1
+  - url: https://polygon-zkevm-mainnet.public.blastapi.io
+    priority: 1
+  - url: https://polygon-zkevm.drpc.org
+    priority: 1
+  - url: https://polygon-zkevm-public.nodies.app
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/polygon-zkevm/mainnet/public
+    priority: 1
+  - url: https://node.histori.xyz/polygon-zkevm-mainnet/8ry9f6t9dct1se2hlagxnd9n2a
+    priority: 1
+  - url: https://polygon-zkevm.rpc.grove.city/v1/01fdb492
+    priority: 1
+  - url: https://zkevm-rpc.com
+    priority: 1

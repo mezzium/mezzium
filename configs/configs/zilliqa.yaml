@@ -1,0 +1,11 @@
+route: /zilliqa
+protocol: evm
+chainId: 32769
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://api.zilliqa.com
+    priority: 1

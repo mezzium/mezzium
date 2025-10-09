@@ -1,0 +1,23 @@
+route: /iotex
+protocol: evm
+chainId: 4689
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://babel-api.mainnet.iotex.io
+    priority: 1
+  - url: https://babel-api.mainnet.iotex.one
+    priority: 1
+  - url: https://babel-api.fastblocks.io
+    priority: 1
+  - url: https://rpc.depinscan.io/iotex
+    priority: 1
+  - url: https://rpc.chainanalytics.org/iotex
+    priority: 1
+  - url: https://iotex-network.rpc.thirdweb.com
+    priority: 1
+  - url: https://iotex.api.onfinality.io/public
+    priority: 1

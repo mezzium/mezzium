@@ -1,0 +1,5 @@
+/.idea/
+/.env
+/listing.sh
+/gitlisting.sh
+/parse.sh

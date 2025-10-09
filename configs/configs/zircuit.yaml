@@ -1,0 +1,19 @@
+route: /zircuit
+protocol: evm
+chainId: 48900
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.zircuit.com
+    priority: 1
+  - url: https://mainnet.zircuit.com
+    priority: 1
+  - url: https://zircuit1-mainnet.p2pify.com
+    priority: 1
+  - url: https://zircuit-mainnet.drpc.org
+    priority: 1
+  - url: https://zircuit1-mainnet.liquify.com
+    priority: 1

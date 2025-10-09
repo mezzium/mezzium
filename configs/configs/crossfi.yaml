@@ -1,0 +1,11 @@
+route: /crossfi
+protocol: evm
+chainId: 4158
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.mainnet.ms
+    priority: 1

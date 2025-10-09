@@ -1,0 +1,11 @@
+route: /gochain
+protocol: evm
+chainId: 60
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.gochain.io
+    priority: 1

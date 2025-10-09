@@ -1,0 +1,17 @@
+route: /lukso
+protocol: evm
+chainId: 42
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.mainnet.lukso.network
+    priority: 1
+  - url: https://rpc.lukso.sigmacore.io
+    priority: 1
+  - url: https://42.rpc.thirdweb.com
+    priority: 1
+  - url: https://public-lukso.nownodes.io
+    priority: 1

@@ -1,0 +1,11 @@
+route: /kardia
+protocol: evm
+chainId: 24
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.kardiachain.io
+    priority: 1

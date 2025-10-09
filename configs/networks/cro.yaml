@@ -1,0 +1,12 @@
+route: /cro
+protocol: evm
+timeoutMs: 1500
+nodes:
+  - url: https://evm.cronos.org
+    priority: 1
+    headers:
+      Content-Type: application/json
+  - url: https://cronos-mainnet.gateway.tatum.io/
+    priority: 2
+    headers:
+      x-api-key: ${TATUM_API_KEY}

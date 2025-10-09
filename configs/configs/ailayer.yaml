@@ -1,0 +1,11 @@
+route: /ailayer
+protocol: evm
+chainId: 2649
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet-rpc.ailayer.xyz
+    priority: 1

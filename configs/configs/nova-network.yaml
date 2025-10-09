@@ -1,0 +1,17 @@
+route: /nova-network
+protocol: evm
+chainId: 87
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.novanetwork.io:9070
+    priority: 1
+  - url: https://dev.rpc.novanetwork.io
+    priority: 1
+  - url: https://connect.novanetwork.io
+    priority: 1
+  - url: https://0x57.redjackstudio.com
+    priority: 1

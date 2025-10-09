@@ -1,0 +1,33 @@
+route: /klaytn
+protocol: evm
+chainId: 8217
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://public-en.node.kaia.io
+    priority: 1
+  - url: https://alpha-hardworking-orb.kaia-mainnet.quiknode.pro
+    priority: 1
+  - url: https://kaia.blockpi.network/v1/rpc/public
+    priority: 1
+  - url: https://kaia.rpc.grove.city/v1/803ceedf
+    priority: 1
+  - url: https://kaia-public.nodies.app
+    priority: 1
+  - url: https://go.getblock.io/d7094dbd80ab474ba7042603fe912332
+    priority: 1
+  - url: https://klaytn.api.onfinality.io/public
+    priority: 1
+  - url: https://1rpc.io/klay
+    priority: 1
+  - url: https://klaytn.drpc.org
+    priority: 1
+  - url: https://rpc.ankr.com/kaia
+    priority: 1
+  - url: https://kaia.therpc.io
+    priority: 1
+  - url: https://kaia-mainnet.gateway.tatum.io
+    priority: 1

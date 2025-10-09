@@ -1,0 +1,27 @@
+route: /manta
+protocol: evm
+chainId: 169
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://pacific-rpc.manta.network/http
+    priority: 1
+  - url: https://1rpc.io/manta
+    priority: 1
+  - url: https://manta-pacific-gascap.calderachain.xyz/http
+    priority: 1
+  - url: https://www.tencentcloud-rpc.com/v2/manta/manta-rpc
+    priority: 1
+  - url: https://r1.pacific.manta.systems/http
+    priority: 1
+  - url: https://manta.nirvanalabs.xyz/mantapublic
+    priority: 1
+  - url: https://manta-pacific.calderachain.xyz/http
+    priority: 1
+  - url: https://manta-pacific.drpc.org
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/manta-pacific/mainnet/public
+    priority: 1

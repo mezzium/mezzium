@@ -1,0 +1,17 @@
+route: /ontologyevm
+protocol: evm
+chainId: 58
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://dappnode1.ont.io:10339
+    priority: 1
+  - url: https://dappnode2.ont.io:10339
+    priority: 1
+  - url: https://dappnode3.ont.io:10339
+    priority: 1
+  - url: https://dappnode4.ont.io:10339
+    priority: 1

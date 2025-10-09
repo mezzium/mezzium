@@ -1,0 +1,11 @@
+route: /mtt-network
+protocol: evm
+chainId: 6880
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://evm-rpc.mtt.network
+    priority: 1

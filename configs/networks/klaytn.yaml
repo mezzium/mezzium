@@ -1,0 +1,14 @@
+route: /klay
+protocol: evm
+timeoutMs: 1500
+nodes:
+  - url: https://1rpc.io/klay
+    priority: 1
+    headers:
+      Content-Type: application/json
+  - url: https://klaytn-mainnet.gateway.tatum.io/
+    priority: 2
+    headers:
+      accept: application/json
+      content-type: application/json
+      x-api-key: ${TATUM_API_KEY}

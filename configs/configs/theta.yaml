@@ -1,0 +1,11 @@
+route: /theta
+protocol: evm
+chainId: 361
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://eth-rpc-api.thetatoken.org/rpc
+    priority: 1

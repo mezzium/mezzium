@@ -1,0 +1,23 @@
+route: /smartbch
+protocol: evm
+chainId: 10000
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://smartbch.fountainhead.cash/mainnet
+    priority: 1
+  - url: https://global.uat.cash
+    priority: 1
+  - url: https://rpc.uatvo.com
+    priority: 1
+  - url: https://bch-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://smartbch.greyh.at
+    priority: 1
+  - url: https://rpc-mainnet.smartbch.org
+    priority: 1
+  - url: https://smartbch.devops.cash/mainnet
+    priority: 1

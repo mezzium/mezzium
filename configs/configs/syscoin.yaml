@@ -1,0 +1,21 @@
+route: /syscoin
+protocol: evm
+chainId: 57
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.syscoin.org
+    priority: 1
+  - url: https://rpc.ankr.com/syscoin
+    priority: 1
+  - url: https://syscoin-evm.publicnode.com
+    priority: 1
+  - url: https://rpc.ankr.com/syscoin/${ANKR_API_KEY}
+    priority: 1
+  - url: https://syscoin.public-rpc.com
+    priority: 1
+  - url: https://57.rpc.thirdweb.com
+    priority: 1

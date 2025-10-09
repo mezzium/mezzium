@@ -1,0 +1,17 @@
+route: /fantom
+protocol: evm
+timeoutMs: 1500
+nodes:
+  - url: https://rpcapi.fantom.network
+    priority: 1
+  - url: https://fantom-mainnet.gateway.tatum.io
+    priority: 2
+    headers:
+      x-api-key: ${TATUM_API_KEY}
+---
+---
+route: /sonic
+protocol: evm
+nodes:
+  - url: https://rpc.soniclabs.com
+    priority: 1

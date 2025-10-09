@@ -1,0 +1,13 @@
+route: /swellchain
+protocol: evm
+chainId: 1923
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.ankr.com/swell
+    priority: 1
+  - url: https://swell-mainnet.alt.technology
+    priority: 1

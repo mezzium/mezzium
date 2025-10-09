@@ -1,0 +1,13 @@
+route: /superseed
+protocol: evm
+chainId: 5330
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://superseed.drpc.org
+    priority: 1
+  - url: https://mainnet.superseed.xyz
+    priority: 1

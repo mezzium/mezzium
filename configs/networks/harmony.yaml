@@ -1,0 +1,12 @@
+route: /harmony
+protocol: evm
+timeoutMs: 1500
+nodes:
+  - url: https://rpc.s0.t.hmny.io
+    priority: 1
+    headers:
+      Content-Type: application/json
+  - url: https://harmony-mainnet.gateway.tatum.io/
+    priority: 2
+    headers:
+      x-api-key: ${TATUM_API_KEY}

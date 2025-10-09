@@ -1,0 +1,25 @@
+route: /unichain
+protocol: evm
+chainId: 130
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.unichain.org
+    priority: 1
+  - url: https://unichain.api.onfinality.io/public
+    priority: 1
+  - url: https://unichain-rpc.publicnode.com
+    priority: 1
+  - url: https://unichain.drpc.org
+    priority: 1
+  - url: https://0xrpc.io/uni
+    priority: 1
+  - url: https://unichain.therpc.io
+    priority: 1
+  - url: https://unichain-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://rpc.poolz.finance/unichain
+    priority: 1

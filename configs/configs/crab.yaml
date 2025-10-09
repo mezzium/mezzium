@@ -1,0 +1,15 @@
+route: /crab
+protocol: evm
+chainId: 44
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://crab.api.onfinality.io/public
+    priority: 1
+  - url: https://crab-rpc.darwinia.network
+    priority: 1
+  - url: https://crab-rpc.dcdao.box
+    priority: 1

@@ -1,0 +1,11 @@
+route: /vision
+protocol: evm
+chainId: 888888
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://infragrid.v.network/ethereum/compatible
+    priority: 1

@@ -1,0 +1,103 @@
+route: /binance
+protocol: evm
+chainId: 56
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://binance.llamarpc.com
+    priority: 1
+  - url: https://bsc-dataseed.bnbchain.org
+    priority: 1
+  - url: https://bsc-dataseed1.defibit.io
+    priority: 1
+  - url: https://bsc-dataseed1.ninicoin.io
+    priority: 1
+  - url: https://bsc-dataseed2.defibit.io
+    priority: 1
+  - url: https://bsc-dataseed3.defibit.io
+    priority: 1
+  - url: https://bsc-dataseed4.defibit.io
+    priority: 1
+  - url: https://bsc-dataseed2.ninicoin.io
+    priority: 1
+  - url: https://bsc-dataseed3.ninicoin.io
+    priority: 1
+  - url: https://bsc-dataseed4.ninicoin.io
+    priority: 1
+  - url: https://bsc-dataseed1.bnbchain.org
+    priority: 1
+  - url: https://bsc-dataseed2.bnbchain.org
+    priority: 1
+  - url: https://bsc-dataseed3.bnbchain.org
+    priority: 1
+  - url: https://bsc-dataseed4.bnbchain.org
+    priority: 1
+  - url: https://bsc-dataseed6.dict.life
+    priority: 1
+  - url: https://rpc-bsc.48.club
+    priority: 1
+  - url: https://0.48.club
+    priority: 1
+  - url: https://binance-smart-chain-public.nodies.app
+    priority: 1
+  - url: https://bsc-mainnet.nodereal.io/v1/64a9df0874fb4a93b9d0a3849de012d3
+    priority: 1
+  - url: https://go.getblock.io/cc778cdbdf5c4b028ec9456e0e6c0cf3
+    priority: 1
+  - url: https://bscrpc.com
+    priority: 1
+  - url: https://bsc.rpcgator.com
+    priority: 1
+  - url: https://binance.nodereal.io
+    priority: 1
+  - url: https://bsc-mainnet.rpcfast.com?api_key=xbhWBI1Wkguk8SNMu1bvvLurPGLXmgwYeC4S6g2H7WdwFigZSmPWVZRxrskEQwIf
+    priority: 1
+  - url: https://nodes.vefinetwork.org/smartchain
+    priority: 1
+  - url: https://1rpc.io/bnb
+    priority: 1
+  - url: https://bsc.rpc.blxrbdn.com
+    priority: 1
+  - url: https://bsc.blockpi.network/v1/rpc/private
+    priority: 1
+  - url: https://bnb.api.onfinality.io/public
+    priority: 1
+  - url: https://bsc-rpc.publicnode.com
+    priority: 1
+  - url: https://bsc-mainnet.public.blastapi.io
+    priority: 1
+  - url: https://bsc.meowrpc.com
+    priority: 1
+  - url: https://api.zan.top/bsc-mainnet
+    priority: 1
+  - url: https://bsc.drpc.org
+    priority: 1
+  - url: https://services.tokenview.io/vipapi/nodeservice/bsc?apikey=gVFJX5OyPdc2kHH7youg
+    priority: 1
+  - url: https://rpc.polysplit.cloud/v1/chain/56
+    priority: 1
+  - url: https://public.stackup.sh/api/v1/node/bsc-mainnet
+    priority: 1
+  - url: https://bsc-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://public-bsc.nownodes.io
+    priority: 1
+  - url: https://bsc-mainnet.4everland.org/v1/37fa9972c1b1cd5fab542c7bdd4cde2f
+    priority: 1
+  - url: https://bnb.rpc.subquery.network/public
+    priority: 1
+  - url: https://bsc.blockrazor.xyz
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/bsc/mainnet/public
+    priority: 1
+  - url: https://rpc.owlracle.info/bsc/70d38ce1826c4a60bb2a8e05a6c8b20f
+    priority: 1
+  - url: https://bsc.therpc.io
+    priority: 1
+  - url: https://rpc.poolz.finance/bsc
+    priority: 1
+  - url: https://bsc.rpc.grove.city/v1/01fdb492
+    priority: 1

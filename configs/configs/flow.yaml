@@ -1,0 +1,13 @@
+route: /flow
+protocol: evm
+chainId: 747
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.evm.nodes.onflow.org
+    priority: 1
+  - url: https://flow-mainnet.gateway.tatum.io
+    priority: 1

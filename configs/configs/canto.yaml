@@ -1,0 +1,25 @@
+route: /canto
+protocol: evm
+chainId: 7700
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://canto.gravitychain.io
+    priority: 1
+  - url: https://canto.evm.chandrastation.com
+    priority: 1
+  - url: https://jsonrpc.canto.nodestake.top
+    priority: 1
+  - url: https://canto.dexvaults.com
+    priority: 1
+  - url: https://canto-rpc.ansybl.io
+    priority: 1
+  - url: https://canto.dexrouting.com
+    priority: 1
+  - url: https://canto.slingshot.finance
+    priority: 1
+  - url: https://mainnode.plexnode.org:8545
+    priority: 1

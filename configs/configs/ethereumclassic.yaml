@@ -1,0 +1,27 @@
+route: /ethereumclassic
+protocol: evm
+chainId: 61
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://etc.mytokenpocket.vip
+    priority: 1
+  - url: https://rpc.etcinscribe.com
+    priority: 1
+  - url: https://etc.etcdesktop.com
+    priority: 1
+  - url: https://besu-at.etc-network.info
+    priority: 1
+  - url: https://geth-at.etc-network.info
+    priority: 1
+  - url: https://services.tokenview.io/vipapi/nodeservice/etc?apikey=qVHq2o6jpaakcw3lRstl
+    priority: 1
+  - url: https://etc.rivet.link
+    priority: 1
+  - url: https://0xrpc.io/etc
+    priority: 1
+  - url: https://ethereum-classic-mainnet.gateway.tatum.io
+    priority: 1

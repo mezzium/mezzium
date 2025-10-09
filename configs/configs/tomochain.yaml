@@ -1,0 +1,15 @@
+route: /tomochain
+protocol: evm
+chainId: 88
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://viction.blockpi.network/v1/rpc/public
+    priority: 1
+  - url: https://viction.drpc.org
+    priority: 1
+  - url: https://rpc.viction.xyz
+    priority: 1

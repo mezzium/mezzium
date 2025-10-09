@@ -1,0 +1,11 @@
+route: /cmp
+protocol: evm
+chainId: 256256
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.block.caduceus.foundation
+    priority: 1

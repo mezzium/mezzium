@@ -1,0 +1,13 @@
+route: /energi
+protocol: evm
+chainId: 39797
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://nodeapi.energi.network
+    priority: 1
+  - url: https://explorer.energi.network/api/eth-rpc
+    priority: 1

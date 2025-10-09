@@ -1,0 +1,684 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Mezzium API",
+    "version": "1.0.0",
+    "description": "Proxy JSON-RPC and REST requests to EVM, BTC-like, TRON, Solana and other networks with fail-fast per-node timeouts, health checks, gossip discovery, and admin API for runtime network management."
+  },
+  "servers": [
+    { "url": "https://127.0.0.1:8080", "description": "Local default" }
+  ],
+  "tags": [
+    { "name": "Public", "description": "Public API endpoints" },
+    { "name": "Proxy", "description": "JSON-RPC/REST proxy endpoints" },
+    { "name": "Cluster", "description": "Bootstrap, gossip, leader endpoints" },
+    { "name": "Admin", "description": "Runtime network/node management" },
+    { "name": "Metrics", "description": "Prometheus metrics" }
+  ],
+  "components": {
+    "securitySchemes": {
+      "AdminKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-admin-key",
+        "description": "Admin API key for adding networks and nodes at runtime."
+      }
+    },
+    "schemas": {
+      "JsonRpcRequest": {
+        "type": "object",
+        "required": ["jsonrpc", "method", "id"],
+        "properties": {
+          "jsonrpc": { "type": "string", "example": "2.0" },
+          "method": { "type": "string", "example": "eth_blockNumber" },
+          "params": { "type": "array", "items": {} },
+          "id": { "type": ["string", "integer"], "example": 1 }
+        }
+      },
+      "JsonRpcResponse": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "example": "2.0" },
+          "result": {},
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": { "type": "integer" },
+              "message": { "type": "string" }
+            }
+          },
+          "id": { "type": ["string", "integer"] }
+        }
+      },
+      "Peer": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "addr": { "type": "string", "example": "127.0.0.1:8080" }
+        }
+      },
+      "NodeConfig": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "priority": { "type": "integer", "minimum": 1, "default": 1 },
+          "headers": {
+            "type": "object",
+            "additionalProperties": { "type": "string" },
+            "example": { "x-api-key": "YOUR_KEY" }
+          },
+          "tor": { "type": "boolean", "default": false }
+        },
+        "required": ["url"]
+      },
+      "NodeInfo": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "priority": { "type": "integer" },
+          "alive": { "type": "boolean" },
+          "ping": { "type": "integer", "description": "Latency in ms" }
+        }
+      },
+      "ActiveNetwork": {
+        "type": "object",
+        "properties": {
+          "route": { "type": "string", "example": "/eth" },
+          "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc"] },
+          "timeoutMs": { "type": "integer", "example": 1500 },
+          "nodes": { "type": "array", "items": { "$ref": "#/components/schemas/NodeInfo" } }
+        }
+      },
+      "NetworkConfig": {
+        "type": "object",
+        "required": ["route", "protocol", "nodes"],
+        "properties": {
+          "route": { "type": "string", "example": "/matic" },
+          "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc"] },
+          "timeoutMs": { "type": "integer", "example": 1500 },
+          "nodes": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/NodeConfig" }
+          }
+        }
+      },
+      "AnnounceRequest": {
+        "type": "object",
+        "required": ["id", "name", "internal_addr", "timestamp", "signature"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "internal_addr": { "type": "string", "example": "10.0.0.12:8080" },
+          "timestamp": { "type": "integer" },
+          "signature": { "type": "string", "description": "HMAC-SHA256 hex" }
+        }
+      },
+      "AnnounceResponse": {
+        "type": "object",
+        "properties": {
+          "peers": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Peer" }
+          }
+        }
+      },
+      "GossipMessage": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "peers": { "type": "array", "items": { "$ref": "#/components/schemas/Peer" } }
+        }
+      },
+      "NodeAdvert": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "priority": { "type": "integer" },
+          "protocol": { "type": "string" },
+          "alive": { "type": "boolean" },
+          "ping": { "type": "integer" }
+        }
+      },
+      "NetworkAdvert": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "protocol": { "type": "string" },
+          "nodes": { "type": "array", "items": { "$ref": "#/components/schemas/NodeAdvert" } },
+          "ts": { "type": "integer" }
+        }
+      },
+      "StateMessage": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "networks": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/NetworkAdvert" }
+          }
+        }
+      },
+      "Heartbeat": {
+        "type": "object",
+        "properties": {
+          "leader_id": { "type": "string" },
+          "timestamp": { "type": "integer" }
+        }
+      },
+      "FeeResponse": {
+        "type": "object",
+        "properties": {
+          "baseFee": { "type": "string", "description": "Hex wei" },
+          "maxPriorityFee": { "type": "string", "description": "Hex wei" }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/networkfees": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Get Ethereum gas fee metrics",
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/FeeResponse" },
+                "example": { "baseFee": "0x12345", "maxPriorityFee": "0x1" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/active-nodes": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "List active nodes by network",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": { "$ref": "#/components/schemas/ActiveNetwork" }
+                },
+                "example": {
+                  "eth": {
+                    "route": "/eth",
+                    "protocol": "evm",
+                    "timeoutMs": 1500,
+                    "nodes": [
+                      { "url": "https://ethereum.publicnode.com", "priority": 1, "alive": true, "ping": 123 },
+                      { "url": "https://eth.llamarpc.com", "priority": 2, "alive": true, "ping": 145 }
+                    ]
+                  },
+                  "btc": {
+                    "route": "/btc",
+                    "protocol": "btc",
+                    "timeoutMs": 2500,
+                    "nodes": [
+                      { "url": "https://blockstream.info/api", "priority": 1, "alive": true, "ping": 210 }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/{network}": {
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Proxy JSON-RPC request to a given network",
+        "parameters": [
+          {
+            "name": "network",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "eth"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/JsonRpcRequest" },
+              "examples": {
+                "evm_eth_blockNumber": {
+                  "summary": "EVM: eth_blockNumber",
+                  "value": { "jsonrpc": "2.0", "id": 1, "method": "eth_blockNumber", "params": [] }
+                },
+                "sol_getSlot": {
+                  "summary": "Solana: getSlot",
+                  "value": { "jsonrpc": "2.0", "id": 1, "method": "getSlot", "params": [{ "commitment": "finalized" }] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Upstream JSON-RPC response",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/JsonRpcResponse" },
+                "example": { "jsonrpc": "2.0", "id": 1, "result": "0x10d4f" }
+              }
+            }
+          },
+          "429": { "description": "Rate limited" },
+          "502": { "description": "All upstreams failed" }
+        }
+      }
+    },
+    "/{network}/{tail}": {
+      "get": {
+        "tags": ["Proxy"],
+        "summary": "Proxy REST/HTTP request to a given network (path tail)",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "btc" },
+          { "name": "tail", "in": "path", "required": true, "schema": { "type": "string" }, "example": "blocks/tip/height" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upstream response",
+            "content": {
+              "application/json": { "schema": { "type": "string" }, "example": "854321" },
+              "text/plain": { "schema": { "type": "string" }, "example": "854321" }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": ["Proxy"],
+        "summary": "Proxy REST/HTTP POST to a given network (path tail)",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "trx" },
+          { "name": "tail", "in": "path", "required": true, "schema": { "type": "string" }, "example": "wallet/getblockbynum" }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": { "type": "object" },
+              "examples": {
+                "trx_getblockbynum": { "summary": "TRON: get block by num", "value": { "num": 75272972 } },
+                "nft_ownerOf": {
+                  "summary": "NFT adapter via /nft/{contract}/{tokenId}",
+                  "value": { "jsonrpc": "2.0", "id": 1, "method": "eth_call", "params": [ { "to": "0xABC...", "data": "0x6352211e..." }, "latest" ] }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Upstream response" },
+          "404": { "description": "Not found at upstream" }
+        }
+      }
+    },
+    "/announce": {
+      "post": {
+        "tags": ["Cluster"],
+        "summary": "Announce this node to bootstrap server",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/AnnounceRequest" },
+              "example": {
+                "id": "e6a1bdce-7f7e-4aab-9c2b-5b8f2a3e1f00",
+                "name": "rpcf-node-1",
+                "internal_addr": "10.0.0.12:8080",
+                "timestamp": 1732522800,
+                "signature": "c0ffee..."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of known peers",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/AnnounceResponse" },
+                "example": { "peers": [ { "id": "self", "addr": "10.0.0.12:8080" }, { "id": "peer-2", "addr": "10.0.0.13:8080" } ] }
+              }
+            }
+          },
+          "403": { "description": "Invalid signature" }
+        }
+      }
+    },
+    "/gossip": {
+      "post": {
+        "tags": ["Cluster"],
+        "summary": "Receive peer list via gossip",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/GossipMessage" },
+              "example": { "from": "node-1", "peers": [ { "id": "node-1", "addr": "10.0.0.12:8080" }, { "id": "node-2", "addr": "10.0.0.13:8080" } ] }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/gossip-state": {
+      "post": {
+        "tags": ["Cluster"],
+        "summary": "Receive best-node state via gossip",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/StateMessage" },
+              "example": {
+                "from": "node-1",
+                "networks": [
+                  {
+                    "name": "eth",
+                    "protocol": "evm",
+                    "nodes": [ { "url": "https://eth.llamarpc.com", "priority": 1, "protocol": "evm", "alive": true, "ping": 123 } ],
+                    "ts": 1732522800
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/heartbeat": {
+      "post": {
+        "tags": ["Cluster"],
+        "summary": "Record heartbeat from leader node",
+        "requestBody": {
+          "required": true,
+          "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Heartbeat" }, "example": { "leader_id": "node-1", "timestamp": 1732522800 } } }
+        },
+        "responses": { "200": { "description": "Heartbeat recorded" } }
+      }
+    },
+    "/healthz": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Liveness check",
+        "responses": { "200": { "description": "ok", "content": { "text/plain": { "example": "ok" } } } }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": ["Metrics"],
+        "summary": "Prometheus metrics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": { "text/plain": { "example": "# HELP rpcf_proxy_success_total Successful proxy calls\nrpcf_proxy_success_total{network=\"eth\"} 123\n" } }
+          }
+        }
+      }
+    },
+    "/admin/networks": {
+      "post": {
+        "tags": ["Admin"],
+        "security": [{ "AdminKey": [] }],
+        "summary": "Add a new network",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NetworkConfig" },
+              "example": {
+                "route": "/matic",
+                "protocol": "evm",
+                "timeoutMs": 1500,
+                "nodes": [
+                  { "url": "https://polygon-rpc.com", "priority": 1 },
+                  { "url": "https://polygon-mainnet.gateway.tatum.io", "priority": 2, "headers": { "x-api-key": "YOUR_KEY" } }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Network added" },
+          "400": { "description": "Invalid payload or no healthy nodes" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/admin/{network}/nodes": {
+      "post": {
+        "tags": ["Admin"],
+        "security": [{ "AdminKey": [] }],
+        "summary": "Add a node to an existing network",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "eth" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/NodeConfig" },
+              "example": {
+                "url": "https://another-rpc-endpoint.example",
+                "priority": 3,
+                "headers": { "x-api-key": "abc123" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Node added" },
+          "400": { "description": "Invalid payload or unhealthy node" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "get": {
+        "tags": ["Admin"],
+        "security": [{ "AdminKey": [] }],
+        "summary": "List all nodes for a network",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Array of node configs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": { "$ref": "#/components/schemas/NodeConfig" }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Unknown network" }
+        }
+      },
+      "delete": {
+        "tags": ["Admin"],
+        "security": [{ "AdminKey": [] }],
+        "summary": "Delete a node by URL",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["url"],
+                "properties": { "url": { "type": "string", "format": "uri" } }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Node removed" },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "404": { "description": "Unknown network" }
+        }
+      }
+    },
+    "/admin/networks/bulk": {
+      "post": {
+        "tags": ["Admin"],
+        "security": [{ "AdminKey": [] }],
+        "summary": "Add multiple networks in bulk",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/NetworkConfig" }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Bulk add result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "route": { "type": "string" },
+                      "status": { "type": "string" },
+                      "reason": { "type": "string" },
+                      "healthyNodes": { "type": "integer" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    },
+    "/proxy/eth/fee": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Get current Ethereum fees from Tatum",
+        "responses": {
+          "200": {
+            "description": "Fee data",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy/eth/maxPriorityFee": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Get eth_maxPriorityFeePerGas from a healthy ETH node",
+        "responses": {
+          "200": {
+            "description": "Max priority fee",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy/eth/estimateGas": {
+      "post": {
+        "tags": ["Public"],
+        "summary": "Estimate gas for a transaction via eth_estimateGas",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": { "type": "object" }
+              },
+              "example": [
+                {
+                  "from": "0xabc...",
+                  "to": "0xdef...",
+                  "value": "0x1",
+                  "data": "0x..."
+                }
+              ]
+            }
+          }
+        },
+        "responses": {
+          "200": { "description": "Estimated gas" }
+        }
+      }
+    },
+    "/proxy/btc/fees": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Get Bitcoin fee recommendations from Tatum",
+        "responses": {
+          "200": {
+            "description": "Fee data",
+            "content": {
+              "application/json": {
+                "schema": { "type": "object" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/proxy/nft/get-all-nfts/{address}": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "List all NFTs owned by address (Alchemy)",
+        "parameters": [
+          {
+            "name": "address",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": { "description": "NFT list" }
+        }
+      }
+    },
+    "/proxy/nft/get-nft-metadata/{contract}/{tokenId}": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Get metadata for a specific NFT (Alchemy)",
+        "parameters": [
+          { "name": "contract", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "tokenId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": { "description": "NFT metadata" }
+        }
+      }
+    }
+  }
+}

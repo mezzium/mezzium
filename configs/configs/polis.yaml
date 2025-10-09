@@ -1,0 +1,11 @@
+route: /polis
+protocol: evm
+chainId: 333999
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.polis.tech
+    priority: 1

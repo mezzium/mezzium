@@ -1,0 +1,15 @@
+route: /conflux
+protocol: evm
+chainId: 1030
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://evm.confluxrpc.com
+    priority: 1
+  - url: https://conflux-espace-public.unifra.io
+    priority: 1
+  - url: https://conflux-espace.blockpi.network/v1/rpc/public
+    priority: 1

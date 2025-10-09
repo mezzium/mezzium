@@ -1,0 +1,25 @@
+route: /sonic
+protocol: evm
+chainId: 146
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.soniclabs.com
+    priority: 1
+  - url: https://sonic.drpc.org
+    priority: 1
+  - url: https://rpc.ankr.com/sonic_mainnet
+    priority: 1
+  - url: https://sonic.api.onfinality.io/public
+    priority: 1
+  - url: https://sonic.therpc.io
+    priority: 1
+  - url: https://sonic-json-rpc.stakely.io
+    priority: 1
+  - url: https://sonic.rpc.grove.city/v1/01fdb492
+    priority: 1
+  - url: https://sonic-rpc.publicnode.com
+    priority: 1

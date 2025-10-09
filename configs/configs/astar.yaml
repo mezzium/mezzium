@@ -1,0 +1,29 @@
+route: /astar
+protocol: evm
+chainId: 592
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://evm.astar.network
+    priority: 1
+  - url: https://rpc.astar.network:8545
+    priority: 1
+  - url: https://astar.public.blastapi.io
+    priority: 1
+  - url: https://getblock.io/nodes/bsc
+    priority: 1
+  - url: https://1rpc.io/astr
+    priority: 1
+  - url: https://astar-mainnet.g.alchemy.com/v2/demo
+    priority: 1
+  - url: https://astar.api.onfinality.io/public
+    priority: 1
+  - url: https://astar-rpc.dwellir.com
+    priority: 1
+  - url: https://astar.public.curie.radiumblock.co/http
+    priority: 1
+  - url: https://astar.public.curie.radiumblock.co/ws
+    priority: 1

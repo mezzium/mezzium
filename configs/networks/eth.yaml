@@ -1,0 +1,38 @@
+route: /eth
+protocol: evm
+timeoutMs: 1500
+
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2            # clamp для стабильности
+  ttlSeconds: 10                # кэш TTL
+
+nodes:
+  - url: https://eth.llamarpc.com
+    priority: 1
+  - url: https://gateway.tenderly.co/public/mainnet
+    priority: 1
+  - url: https://ethereum.blockpi.network/v1/rpc/public
+    priority: 1
+  - url: https://1rpc.io/eth
+    priority: 1
+  - url: https://eth-pokt.nodies.app
+    priority: 1
+  - url: https://rpc.payload.de
+    priority: 1
+  - url: https://ethereum-rpc.publicnode.com
+    priority: 1
+  - url: https://eth.drpc.org
+    priority: 1
+
+  - url: https://ethereum-mainnet.gateway.tatum.io/
+    priority: 2
+    headers:
+      content-type: application/json
+      x-api-key: ${TATUM_API_KEY}
+
+  - url: https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+    priority: 3
+    headers:
+      Content-Type: application/json
+

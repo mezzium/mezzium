@@ -1,0 +1,11 @@
+route: /katana
+protocol: evm
+chainId: 747474
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.katana.network
+    priority: 1

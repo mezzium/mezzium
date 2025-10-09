@@ -1,0 +1,11 @@
+route: /haven1
+protocol: evm
+chainId: 8811
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.haven1.org
+    priority: 1

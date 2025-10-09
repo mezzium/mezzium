@@ -1,0 +1,11 @@
+route: /fusion
+protocol: evm
+chainId: 32659
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.fusionnetwork.io
+    priority: 1

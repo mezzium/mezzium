@@ -1,0 +1,21 @@
+route: /aurora
+protocol: evm
+chainId: 1313161554
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet.aurora.dev
+    priority: 1
+  - url: https://1rpc.io/aurora
+    priority: 1
+  - url: https://aurora.drpc.org
+    priority: 1
+  - url: https://aurora-mainnet.gateway.tatum.io
+    priority: 1
+  - url: https://endpoints.omniatech.io/v1/aurora/mainnet/public
+    priority: 1
+  - url: https://rpc.owlracle.info/aurora/70d38ce1826c4a60bb2a8e05a6c8b20f
+    priority: 1

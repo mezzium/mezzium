@@ -1,0 +1,31 @@
+route: /hydradx
+protocol: evm
+chainId: 222222
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://rpc.hydradx.cloud
+    priority: 1
+  - url: https://hydration-rpc.n.dwellir.com
+    priority: 1
+  - url: https://rpc.helikon.io/hydradx
+    priority: 1
+  - url: https://hydration.dotters.network
+    priority: 1
+  - url: https://hydration.ibp.network
+    priority: 1
+  - url: https://rpc.cay.hydration.cloud
+    priority: 1
+  - url: https://rpc.parm.hydration.cloud
+    priority: 1
+  - url: https://rpc.roach.hydration.cloud
+    priority: 1
+  - url: https://rpc.zipp.hydration.cloud
+    priority: 1
+  - url: https://rpc.sin.hydration.cloud
+    priority: 1
+  - url: https://rpc.coke.hydration.cloud
+    priority: 1

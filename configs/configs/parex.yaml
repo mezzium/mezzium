@@ -1,0 +1,11 @@
+route: /parex
+protocol: evm
+chainId: 322202
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://mainnet-rpc.parex.network
+    priority: 1

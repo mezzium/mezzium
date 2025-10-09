@@ -1,0 +1,15 @@
+route: /planq
+protocol: evm
+chainId: 7070
+timeoutMs: 1500
+gas:
+  externalUrl: ""
+  minPriorityGwei: 2
+  ttlSeconds: 10
+nodes:
+  - url: https://planq-public.nodies.app
+    priority: 1
+  - url: https://jsonrpc.planq.nodestake.top
+    priority: 1
+  - url: https://evm-rpc.planq.network
+    priority: 1
