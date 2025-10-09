@@ -1,8 +1,19 @@
 <p align="center">
   <a href="./logo/mezzium-logo.png">
-    <img src="./logo/mezzium-logo.png" alt="Mezzium logo" width="320">
+    <img src="./logo/mezzium-logo.png" alt="Mezzium logo — modular multi-chain proxy" width="320">
   </a>
 </p>
+
+
+
+## License
+
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
+[![Docker Image](https://img.shields.io/badge/docker-shuliakovsky%2Fmezzium-blue.svg)](https://hub.docker.com/r/shuliakovsky/mezzium)
+
+Mezzium is licensed under the Apache License 2.0. See the [LICENSE](./LICENSE) file for details.
+
+Commercial support, SLA and licensing options are available — contact: <a href="mailto:sales@zbounce.net">mezzium</a>
 
 ## Overview
 
