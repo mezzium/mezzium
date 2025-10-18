@@ -10,6 +10,39 @@ import (
 func adaptEVM(tail, method string, _ http.Header, body []byte, logger *zap.Logger) Result {
 	ltail := strings.ToLower(strings.TrimPrefix(tail, "/"))
 
+	// --- NFT шорткаты ---
+	if strings.HasPrefix(ltail, "nft/") {
+		parts := strings.Split(ltail, "/")
+		if len(parts) >= 3 && isHexAddress(parts[1]) {
+			contract := parts[1]
+			tokenId := parts[2]
+
+			data := BuildOwnerOfData(tokenId)
+			payload := map[string]any{
+				"jsonrpc": "2.0",
+				"id":      1,
+				"method":  "eth_call",
+				"params": []any{
+					map[string]string{
+						"to":   NormalizeHex(contract),
+						"data": data,
+					},
+					"latest",
+				},
+			}
+			logger.Debug("evm_adapter_nft_ownerOf",
+				zap.String("contract", contract),
+				zap.String("tokenId", tokenId),
+			)
+			return Result{
+				Tail:    "",
+				Method:  http.MethodPost,
+				Body:    mustJSON(payload),
+				Headers: ensureJSON(nil),
+			}
+		}
+	}
+
 	// Поддержка удобных GET-маршрутов
 	if method == http.MethodGet {
 		switch {
@@ -74,7 +107,7 @@ func adaptEVM(tail, method string, _ http.Header, body []byte, logger *zap.Logge
 		}
 	}
 
-	// Иначе — поведение по умолчанию (как было)
+	// Иначе — поведение по умолчанию
 	return Result{
 		Tail:    tail,
 		Method:  method,

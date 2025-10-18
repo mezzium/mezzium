@@ -24,8 +24,6 @@ func Adapt(network, protocol, baseURL, tail, method string, hdr http.Header, bod
 		return adaptTRX(tail, method, hdr, body, logger)
 	case "btc":
 		return adaptBTC(tail, method, hdr, body, logger)
-	case "nft":
-		return adaptNFT(tail, method, hdr, body, logger)
 	case "sol":
 		return adaptSOL(tail, method, hdr, body, logger)
 	case "doge":

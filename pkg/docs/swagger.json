@@ -407,6 +407,52 @@
         }
       }
     },
+    "/ethereum/nft/{contract}/{tokenId}": {
+      "get": {
+        "summary": "Get NFT owner",
+        "description": "Returns the owner of an NFT token using eth_call(ownerOf). This is a REST shortcut on top of Ethereum RPC.",
+        "parameters": [
+          {
+            "name": "contract",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string", "pattern": "^0x[a-fA-F0-9]{40}$" },
+            "description": "NFT contract address (ERC-721/1155)"
+          },
+          {
+            "name": "tokenId",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "Token ID (decimal or hex)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response with the token owner address",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "jsonrpc": { "type": "string", "example": "2.0" },
+                    "id": { "type": "integer", "example": 1 },
+                    "result": {
+                      "type": "string",
+                      "example": "0x1234567890abcdef1234567890abcdef12345678",
+                      "description": "Owner address of the token"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Invalid contract address or tokenId" },
+          "502": { "description": "Upstream RPC error" }
+        },
+        "tags": ["Ethereum", "NFT"]
+      }
+    },
     "/announce": {
       "post": {
         "tags": ["Cluster"],
