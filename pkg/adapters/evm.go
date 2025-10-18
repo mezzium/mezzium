@@ -66,7 +66,7 @@ func adaptEVM(tail, method string, _ http.Header, body []byte, logger *zap.Logge
 						"jsonrpc": "2.0",
 						"id":      1,
 						"method":  "eth_getBalance",
-						"params":  []any{normalizeHex(addr), "latest"},
+						"params":  []any{NormalizeHex(addr), "latest"},
 					}),
 					Headers: ensureJSON(nil),
 				}

@@ -26,6 +26,7 @@ func LoadAll(dir string, logger *zap.Logger) (map[string]NetworkConfig, error) {
 		if err != nil {
 			return nil, err
 		}
+
 		b = re.ReplaceAllFunc(b, func(m []byte) []byte {
 			k := string(re.FindSubmatch(m)[1])
 			val := os.Getenv(k)
@@ -37,18 +38,27 @@ func LoadAll(dir string, logger *zap.Logger) (map[string]NetworkConfig, error) {
 			return []byte(val)
 		})
 
-		// If any ${VAR} remains -> misconfiguration
+		// If any ${VAR} remains -> warn but continue
 		if re.Match(b) {
 			logger.Error("unresolved ${VAR} placeholders left after env expansion",
 				zap.String("file", e.Name()))
 		}
+
 		var nc NetworkConfig
 		if err := yaml.Unmarshal(b, &nc); err != nil {
 			return nil, fmt.Errorf("%s: %w", e.Name(), err)
 		}
-		if nc.Route == "" || nc.Protocol == "" || len(nc.Nodes) == 0 {
-			return nil, fmt.Errorf("%s: invalid network config", e.Name())
+
+		// require route and protocol but allow zero nodes
+		if nc.Route == "" || nc.Protocol == "" {
+			return nil, fmt.Errorf("%s: missing required fields (route/protocol)", e.Name())
 		}
+		if len(nc.Nodes) == 0 {
+			logger.Warn("network config has no active nodes; network will be inactive until nodes are added",
+				zap.String("file", e.Name()),
+				zap.String("route", nc.Route))
+		}
+
 		for i := range nc.Nodes {
 			if nc.Nodes[i].Priority == 0 {
 				nc.Nodes[i].Priority = 1

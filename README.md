@@ -1,15 +1,10 @@
 <p align="center">
-  <a href="./logo/mezzium-logo.png">
-    <img src="./logo/mezzium-logo.png" alt="Mezzium logo — modular multi-chain proxy" width="320">
-  </a>
+  <img src="logo/mezzium-logo.png" alt="Mezzium logo — modular multi-chain proxy" width="320" />
 </p>
 
-
-
-## License
-
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](./LICENSE)
+[![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![Docker Image](https://img.shields.io/badge/docker-shuliakovsky%2Fmezzium-blue.svg)](https://hub.docker.com/r/shuliakovsky/mezzium)
+
 
 Mezzium is licensed under the Apache License 2.0. See the [LICENSE](./LICENSE) file for details.
 
@@ -60,11 +55,10 @@ These adapters simplify integration by exposing user‑friendly endpoints.
 
 ### Public API Endpoints
 Predefined public endpoints are available out of the box:
-- `/proxy/ethereum/fee`
-- `/proxy/btc/fees`
-- `/proxy/nft/get-all-nfts/{address}`
-- `/proxy/nft/get-nft-metadata/{contract}/{tokenId}`
-- `/proxy/ethereum/estimateGas`
+- `GET /{network}/gas` — EVM gas recommendations (EVM networks only; e.g. `ethereum`, `polygon`, `bsc`, `arbitrum`, `optimism`)
+- `/btc/fees`
+- `/nft/get-all-nfts/{address}`
+- `/nft/get-nft-metadata/{contract}/{tokenId}`
 
 ### Leader Election & Heartbeat
 A lightweight **leader election** mechanism is built in.  
@@ -107,10 +101,6 @@ The Mezzium uses several environment variables to configure its behavior. Here's
 | `TOR_SOCKS5`              | SOCKS5 proxy address for Tor-enabled nodes                     | `127.0.0.1:9050`    |
 | `ADMIN_API_KEY`           | API key for accessing `/admin/*` endpoints                     | `changeme`          |
 | `SWAGGER_HOST`            | Hostname for Swagger UI                                        | *(optional)*        |
-| `TATUM_API_KEY`           | API key for Tatum RPC providers                                | *(optional)*        |
-| `TATUM_API_KEY_TESTNET`   | Optional testnet key for Tatum (now properly redacted in logs) | *(optional)*        |
-| `ALCHEMY_API_KEY`         | API key for Alchemy RPC providers                              | *(required)*        |
-| `ALCHEMY_API_KEY_TESTNET` | Optional testnet key for Alchemy RPC providers                 | *(optional)*        |
 
 > ️ If `ADMIN_API_KEY` is left as `changeme`, admin endpoints are unprotected.
 

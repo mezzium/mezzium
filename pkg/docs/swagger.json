@@ -6,14 +6,29 @@
     "description": "Proxy JSON-RPC and REST requests to EVM, BTC-like, TRON, Solana and other networks with fail-fast per-node timeouts, health checks, gossip discovery, and admin API for runtime network management."
   },
   "servers": [
-    { "url": "https://api.mezzium.net", "description": "api.mezzium.net" },
-    { "url": "http://127.0.0.1:8080", "description": "Local default" }
+    {
+      "url": "{protocol}://{host}",
+      "description": "Primary server (parameterized)",
+      "variables": {
+        "protocol": {
+          "default": "https",
+          "enum": ["https", "http"]
+        },
+        "host": {
+          "default": "api.mezzium.net"
+        }
+      }
+    },
+    {
+      "url": "http://127.0.0.1:8080",
+      "description": "Local default"
+    }
   ],
   "tags": [
     { "name": "Public", "description": "Public API endpoints" },
     { "name": "Proxy", "description": "JSON-RPC/REST proxy endpoints" },
-    { "name": "Cluster", "description": "Bootstrap, gossip, leader endpoints" },
-    { "name": "Admin", "description": "Runtime network/node management" },
+    { "name": "Cluster", "description": "Bootstrap, gossip, leader endpoints (internal cluster API)" },
+    { "name": "Admin", "description": "Runtime network/node management (requires x-admin-key)" },
     { "name": "Metrics", "description": "Prometheus metrics" }
   ],
   "components": {
@@ -81,13 +96,24 @@
           "ping": { "type": "integer", "description": "Latency in ms" }
         }
       },
+      "NodeWithPing": {
+        "type": "object",
+        "properties": {
+          "url": { "type": "string" },
+          "priority": { "type": "integer" },
+          "headers": { "type": "object", "additionalProperties": { "type": "string" } },
+          "tor": { "type": "boolean" },
+          "alive": { "type": "boolean" },
+          "ping": { "type": "integer" }
+        }
+      },
       "ActiveNetwork": {
         "type": "object",
         "properties": {
           "route": { "type": "string", "example": "/ethereum" },
-          "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc"] },
+          "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc", "nft"] },
           "timeoutMs": { "type": "integer", "example": 1500 },
-          "nodes": { "type": "array", "items": { "$ref": "#/components/schemas/NodeInfo" } }
+          "nodes": { "type": "array", "items": { "$ref": "#/components/schemas/NodeWithPing" } }
         }
       },
       "NetworkConfig": {
@@ -95,8 +121,16 @@
         "required": ["route", "protocol", "nodes"],
         "properties": {
           "route": { "type": "string", "example": "/matic" },
-          "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc"] },
+          "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc", "nft"] },
           "timeoutMs": { "type": "integer", "example": 1500 },
+          "gas": {
+            "type": "object",
+            "properties": {
+              "externalUrl": { "type": "string", "format": "uri" },
+              "minPriorityGwei": { "type": "integer" },
+              "ttlSeconds": { "type": "integer" }
+            }
+          },
           "nodes": {
             "type": "array",
             "items": { "$ref": "#/components/schemas/NodeConfig" }
@@ -111,7 +145,10 @@
           "name": { "type": "string" },
           "internal_addr": { "type": "string", "example": "10.0.0.12:8080" },
           "timestamp": { "type": "integer" },
-          "signature": { "type": "string", "description": "HMAC-SHA256 hex" }
+          "signature": {
+            "type": "string",
+            "description": "HMAC-SHA256 hex of payload (id+name+internal_addr+timestamp) using shared secret; internal cluster API requires valid signature"
+          }
         }
       },
       "AnnounceResponse": {
@@ -172,27 +209,30 @@
           "baseFee": { "type": "string", "description": "Hex wei" },
           "maxPriorityFee": { "type": "string", "description": "Hex wei" }
         }
+      },
+      "UnifiedGasTier": {
+        "type": "object",
+        "properties": {
+          "maxPriorityFee": { "type": "integer", "description": "priority fee in gwei" },
+          "maxFee": { "type": "integer", "description": "max fee (base + priority) in gwei" },
+          "gasPrice": { "type": "integer", "description": "legacy gas price in gwei (if applicable)" }
+        }
+      },
+      "GasResponse": {
+        "type": "object",
+        "properties": {
+          "fast": { "$ref": "#/components/schemas/UnifiedGasTier" },
+          "standard": { "$ref": "#/components/schemas/UnifiedGasTier" },
+          "slow": { "$ref": "#/components/schemas/UnifiedGasTier" },
+          "estimatedBaseFee": { "type": "integer", "description": "base fee in gwei if available" },
+          "blockNumber": { "type": "integer", "description": "latest block number observed" },
+          "source": { "type": "string", "enum": ["rpc", "external", "cache"], "description": "origin of the value" },
+          "upstream": { "type": "string", "description": "upstream URL or empty" }
+        }
       }
     }
   },
   "paths": {
-    "/networkfees": {
-      "get": {
-        "tags": ["Public"],
-        "summary": "Get Ethereum gas fee metrics",
-        "responses": {
-          "200": {
-            "description": "Success",
-            "content": {
-              "application/json": {
-                "schema": { "$ref": "#/components/schemas/FeeResponse" },
-                "example": { "baseFee": "0x12345", "maxPriorityFee": "0x1" }
-              }
-            }
-          }
-        }
-      }
-    },
     "/active-nodes": {
       "get": {
         "tags": ["Public"],
@@ -234,7 +274,7 @@
     "/{network}": {
       "post": {
         "tags": ["Proxy"],
-        "summary": "Proxy JSON-RPC request to a given network",
+        "summary": "Proxy JSON-RPC request to a given network (root path)",
         "parameters": [
           {
             "name": "network",
@@ -264,7 +304,7 @@
         },
         "responses": {
           "200": {
-            "description": "Upstream JSON-RPC response",
+            "description": "Upstream JSON-RPC response (passthrough)",
             "content": {
               "application/json": {
                 "schema": { "$ref": "#/components/schemas/JsonRpcResponse" },
@@ -278,30 +318,38 @@
       }
     },
     "/{network}/{tail}": {
+      "parameters": [
+        {
+          "name": "network",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string" }
+        },
+        {
+          "name": "tail",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "string", "pattern": ".+" },
+          "description": "Catch-all remainder of path (may contain slashes)"
+        }
+      ],
       "get": {
         "tags": ["Proxy"],
-        "summary": "Proxy REST/HTTP request to a given network (path tail)",
-        "parameters": [
-          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "btc" },
-          { "name": "tail", "in": "path", "required": true, "schema": { "type": "string" }, "example": "blocks/tip/height" }
-        ],
+        "summary": "Proxy REST/HTTP request to a given network (path tail, catch-all)",
         "responses": {
           "200": {
-            "description": "Upstream response",
+            "description": "Upstream response (passthrough)",
             "content": {
               "application/json": { "schema": { "type": "string" }, "example": "854321" },
               "text/plain": { "schema": { "type": "string" }, "example": "854321" }
             }
-          }
+          },
+          "503": { "description": "no available upstreams" }
         }
       },
       "post": {
         "tags": ["Proxy"],
-        "summary": "Proxy REST/HTTP POST to a given network (path tail)",
-        "parameters": [
-          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "trx" },
-          { "name": "tail", "in": "path", "required": true, "schema": { "type": "string" }, "example": "wallet/getblockbynum" }
-        ],
+        "summary": "Proxy REST/HTTP POST to a given network (path tail, catch-all)",
         "requestBody": {
           "required": false,
           "content": {
@@ -310,7 +358,7 @@
               "examples": {
                 "trx_getblockbynum": { "summary": "TRON: get block by num", "value": { "num": 75272972 } },
                 "nft_ownerOf": {
-                  "summary": "NFT adapter via /nft/{contract}/{tokenId}",
+                  "summary": "NFT adapter via /ethereum/nft/{contract}/{tokenId}",
                   "value": { "jsonrpc": "2.0", "id": 1, "method": "eth_call", "params": [ { "to": "0xABC...", "data": "0x6352211e..." }, "latest" ] }
                 }
               }
@@ -319,14 +367,51 @@
         },
         "responses": {
           "200": { "description": "Upstream response" },
-          "404": { "description": "Not found at upstream" }
+          "404": { "description": "Not found at upstream" },
+          "502": { "description": "All upstreams failed" }
+        }
+      },
+      "put": {
+        "tags": ["Proxy"],
+        "summary": "Proxy PUT to upstream (passthrough)",
+        "responses": {
+          "200": { "description": "Upstream response" }
+        }
+      },
+      "delete": {
+        "tags": ["Proxy"],
+        "summary": "Proxy DELETE to upstream (passthrough)",
+        "responses": {
+          "200": { "description": "Upstream response" }
+        }
+      }
+    },
+    "/{network}/gas": {
+      "get": {
+        "tags": ["Public", "Proxy"],
+        "summary": "Get gas tiers for network (external → cache → compute via RPC)",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Gas tiers",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/GasResponse" }
+              }
+            }
+          },
+          "503": { "description": "no nodes" },
+          "502": { "description": "calc failed" }
         }
       }
     },
     "/announce": {
       "post": {
         "tags": ["Cluster"],
-        "summary": "Announce this node to bootstrap server",
+        "summary": "Announce this node to bootstrap server (internal cluster API)",
+        "description": "Internal cluster endpoint. Body must include HMAC-SHA256 signature of payload id+name+internal_addr+timestamp computed using shared secret. This is validated by the server; invalid signature returns 403.",
         "requestBody": {
           "required": true,
           "content": {
@@ -352,14 +437,15 @@
               }
             }
           },
-          "403": { "description": "Invalid signature" }
+          "403": { "description": "Invalid signature" },
+          "405": { "description": "method not allowed" }
         }
       }
     },
     "/gossip": {
       "post": {
         "tags": ["Cluster"],
-        "summary": "Receive peer list via gossip",
+        "summary": "Receive peer list via gossip (internal)",
         "requestBody": {
           "required": true,
           "content": {
@@ -369,13 +455,13 @@
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": { "200": { "description": "OK" }, "405": { "description": "method not allowed" } }
       }
     },
     "/gossip-state": {
       "post": {
         "tags": ["Cluster"],
-        "summary": "Receive best-node state via gossip",
+        "summary": "Receive best-node state via gossip (internal)",
         "requestBody": {
           "required": true,
           "content": {
@@ -395,18 +481,18 @@
             }
           }
         },
-        "responses": { "200": { "description": "OK" } }
+        "responses": { "200": { "description": "OK" }, "405": { "description": "method not allowed" } }
       }
     },
     "/heartbeat": {
       "post": {
         "tags": ["Cluster"],
-        "summary": "Record heartbeat from leader node",
+        "summary": "Record heartbeat from leader node (internal)",
         "requestBody": {
           "required": true,
           "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Heartbeat" }, "example": { "leader_id": "node-1", "timestamp": 1732522800 } } }
         },
-        "responses": { "200": { "description": "Heartbeat recorded" } }
+        "responses": { "200": { "description": "Heartbeat recorded" }, "405": { "description": "method not allowed" } }
       }
     },
     "/healthz": {
@@ -575,109 +661,62 @@
         }
       }
     },
-    "/proxy/ethereum/fee": {
+    "/btc/balance/{address}": {
       "get": {
         "tags": ["Public"],
-        "summary": "Get current Ethereum fees from Tatum",
-        "responses": {
-          "200": {
-            "description": "Fee data",
-            "content": {
-              "application/json": {
-                "schema": { "type": "object" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/ethereum/maxPriorityFee": {
-      "get": {
-        "tags": ["Public"],
-        "summary": "Get eth_maxPriorityFeePerGas from a healthy ETH node",
-        "responses": {
-          "200": {
-            "description": "Max priority fee",
-            "content": {
-              "application/json": {
-                "schema": { "type": "object" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/ethereum/estimateGas": {
-      "post": {
-        "tags": ["Public"],
-        "summary": "Estimate gas for a transaction via eth_estimateGas",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "array",
-                "items": { "type": "object" }
-              },
-              "example": [
-                {
-                  "from": "0x0000000000000000000000000000000000000000",
-                  "to": "0x0000000000000000000000000000000000000000",
-                  "value": "0x1",
-                  "data": "0x"
-                }
-              ]
-            }
-          }
-        },
-        "responses": {
-          "200": { "description": "Estimated gas" }
-        }
-      }
-    },
-    "/proxy/btc/fees": {
-      "get": {
-        "tags": ["Public"],
-        "summary": "Get Bitcoin fee recommendations from Tatum",
-        "responses": {
-          "200": {
-            "description": "Fee data",
-            "content": {
-              "application/json": {
-                "schema": { "type": "object" }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/proxy/nft/get-all-nfts/{address}": {
-      "get": {
-        "tags": ["Public"],
-        "summary": "List all NFTs owned by address (Alchemy)",
+        "summary": "Get BTC balance for address via BTC node pool",
         "parameters": [
-          {
-            "name": "address",
-            "in": "path",
-            "required": true,
-            "schema": { "type": "string" }
-          }
+          { "name": "address", "in": "path", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "200": { "description": "NFT list" }
+          "200": { "description": "Balance (as returned by upstream)", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "503": { "description": "no healthy BTC nodes" },
+          "502": { "description": "upstream failed" }
         }
       }
     },
-    "/proxy/nft/get-nft-metadata/{contract}/{tokenId}": {
+    "/ethereum/nft/get-all-nfts/{owner}": {
       "get": {
         "tags": ["Public"],
-        "summary": "Get metadata for a specific NFT (Alchemy)",
+        "summary": "List all NFTs owned by address (uses eth calls to EVM RPC)",
+        "parameters": [
+          { "name": "owner", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "contract", "in": "query", "required": true, "schema": { "type": "string" }, "description": "Contract address (required)" },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          { "name": "offset", "in": "query", "schema": { "type": "integer", "default": 0 } }
+        ],
+        "responses": {
+          "200": { "description": "NFT list", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "400": { "description": "owner or contract missing" },
+          "503": { "description": "no healthy ETH nodes" }
+        }
+      }
+    },
+    "/ethereum/nft/get-nft-metadata/{contract}/{tokenId}": {
+      "get": {
+        "tags": ["Public"],
+        "summary": "Get metadata for a specific NFT (tokenURI via eth_call)",
         "parameters": [
           { "name": "contract", "in": "path", "required": true, "schema": { "type": "string" } },
           { "name": "tokenId", "in": "path", "required": true, "schema": { "type": "string" } }
         ],
         "responses": {
-          "200": { "description": "NFT metadata" }
+          "200": { "description": "NFT metadata", "content": { "application/json": { "schema": { "type": "object" } } } },
+          "503": { "description": "no healthy ETH nodes" }
+        }
+      }
+    },
+    "/ws/{network}/": {
+      "get": {
+        "tags": ["Proxy"],
+        "summary": "WebSocket proxy entry (upgrade)",
+        "parameters": [
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "description": "WebSocket proxy stub. Client should perform WebSocket handshake. Upstream must be a ws(s) URL in the registry.",
+        "responses": {
+          "101": { "description": "Switching protocols (proxied websocket)" },
+          "400": { "description": "Bad request or no healthy nodes" }
         }
       }
     }

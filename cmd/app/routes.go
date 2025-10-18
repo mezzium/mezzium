@@ -57,23 +57,14 @@ func registerRoutes(
 	go gossip.Publisher(reg, peerStore, nodeID, logger)
 
 	// Public routes
-	mux.HandleFunc("/networkfees", public.NetworkFees)
 	mux.HandleFunc("/active-nodes", public.ActiveNodes)
 
-	// Fee helpers
-	mux.HandleFunc("/proxy/ethereum/fee", public.EthFee)
-	mux.HandleFunc("/proxy/ethereum/maxPriorityFee", public.EthMaxPriorityFee)
-
 	// Bitcoin helpers
-	mux.HandleFunc("/proxy/btc/fees", public.BTCFees)
-	mux.HandleFunc("/proxy/btc/balance/", public.BTCBalance)
-
-	// gas
-	mux.HandleFunc("/proxy/ethereum/estimateGas", public.EthEstimateGas)
+	mux.HandleFunc("/btc/balance/", public.BTCBalance)
 
 	// NFT helpers
-	mux.HandleFunc("/proxy/nft/get-all-nfts/", public.NFTGetAllNFTs)
-	mux.HandleFunc("/proxy/nft/get-nft-metadata/", public.NFTGetNFTMetadata)
+	mux.HandleFunc("/ethereum/nft/get-all-nfts/", public.NFTGetAllNFTs)
+	mux.HandleFunc("/ethereum/nft/get-nft-metadata/", public.NFTGetNFTMetadata)
 
 	// Admin routes
 	mux.HandleFunc("/admin/networks", adminAPI.AddNetwork)

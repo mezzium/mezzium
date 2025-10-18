@@ -22,15 +22,33 @@ type Proxy struct {
 	Logger   *zap.Logger
 	Client   *http.Client
 	TorSocks string
+
+	// estimate dependencies
+	EvmThrottler interface {
+		IsThrottled(string) bool
+		Mark429(string)
+		Reset(string)
+	}
+
+	Cache interface {
+		Get(string) ([]byte, bool)
+		Set(string, []byte, time.Duration)
+	}
+	DialTimeout time.Duration
 }
 
 func NewProxy(reg *registry.Registry, logger *zap.Logger, torSocks string) *Proxy {
-	return &Proxy{
+	p := &Proxy{
 		Reg:      reg,
 		Logger:   logger,
 		Client:   &http.Client{Timeout: 8 * time.Second},
 		TorSocks: torSocks,
+		// sensible defaults (tune via env if needed)
+		DialTimeout: 500 * time.Millisecond,
 	}
+	// reuse global evmThrottler instance (declared in public.go)
+	p.EvmThrottler = evmThrottler
+	return p
 }
 
 // Handle /{network}[/*tail]

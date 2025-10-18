@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/shuliakovsky/mezzium/pkg/oracle"
+	"github.com/shuliakovsky/mezzium/pkg/registry"
 )
 
 // Центральная точка входа для short-circuit эндпоинтов газа.
@@ -29,8 +30,172 @@ func (p *Proxy) TryServeGasFee(w http.ResponseWriter, r *http.Request, network, 
 	case "optimism":
 		return p.serveOptimismGas(w, r)
 	default:
+		return p.serveGenericGas(w, r, network)
+	}
+}
+
+// GasOracle — интерфейс, возвращающий уже сериализованный JSON-ответ.
+type GasOracle interface {
+	TTLDuration() time.Duration
+	FetchFromOfficial() ([]byte, int, error)
+	ComputeFromRPCBytes(node registry.NodeWithPing) ([]byte, error)
+}
+
+// adapter реализует GasOracle путём вызова конкретного оракула и маршалинга результата.
+type oracleAdapter struct {
+	fetchOfficial func() ([]byte, int, error)
+	compute       func(registry.NodeWithPing) (any, error) // возвращаем any и маршалим здесь
+	ttl           func() time.Duration
+}
+
+func (a *oracleAdapter) TTLDuration() time.Duration {
+	return a.ttl()
+}
+func (a *oracleAdapter) FetchFromOfficial() ([]byte, int, error) {
+	return a.fetchOfficial()
+}
+func (a *oracleAdapter) ComputeFromRPCBytes(node registry.NodeWithPing) ([]byte, error) {
+	v, err := a.compute(node)
+	if err != nil {
+		return nil, err
+	}
+	b, err := json.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
+}
+
+var (
+	genericGasCacheMu sync.RWMutex
+	genericGasCache   = map[string]struct {
+		b   []byte
+		exp time.Time
+	}{}
+)
+
+// NewOracleForNetwork: minimal router by network name / protocol
+func NewOracleForNetwork(name string, reg *registry.Registry) GasOracle {
+	all := reg.All()
+	st, ok := all[name]
+	if !ok {
+		return nil
+	}
+	proto := strings.ToLower(st.Protocol)
+	if proto != "evm" {
+		return nil
+	}
+
+	switch strings.ToLower(name) {
+	case "polygon":
+		o := oracle.NewPolygonGasOracle(st)
+		return &oracleAdapter{
+			fetchOfficial: o.FetchFromOfficial,
+			compute:       func(n registry.NodeWithPing) (any, error) { return o.ComputeFromRPC(n) },
+			ttl:           o.TTLDuration,
+		}
+	case "arbitrum":
+		o := oracle.NewArbitrumGasOracle(st)
+		return &oracleAdapter{
+			fetchOfficial: o.FetchFromOfficial,
+			compute:       func(n registry.NodeWithPing) (any, error) { return o.ComputeFromRPC(n) },
+			ttl:           o.TTLDuration,
+		}
+	case "optimism":
+		o := oracle.NewOptimismGasOracle(st)
+		return &oracleAdapter{
+			fetchOfficial: o.FetchFromOfficial,
+			compute:       func(n registry.NodeWithPing) (any, error) { return o.ComputeFromRPC(n) },
+			ttl:           o.TTLDuration,
+		}
+	case "binance", "bsc":
+		o := oracle.NewBscGasOracle(st)
+		return &oracleAdapter{
+			fetchOfficial: o.FetchFromOfficial,
+			compute:       func(n registry.NodeWithPing) (any, error) { return o.ComputeFromRPC(n) },
+			ttl:           o.TTLDuration,
+		}
+	default:
+		// default: treat as generic EVM (use EthGasOracle)
+		o := oracle.NewEthGasOracle(st)
+		return &oracleAdapter{
+			fetchOfficial: o.FetchFromOfficial,
+			compute:       func(n registry.NodeWithPing) (any, error) { return o.ComputeFromRPC(n) },
+			ttl:           o.TTLDuration,
+		}
+	}
+}
+func (p *Proxy) serveGenericGas(w http.ResponseWriter, r *http.Request, network string) bool {
+	if r.Method != http.MethodGet {
 		return false
 	}
+	start := LogRequest(p.Logger, "proxy_generic_gas", r.Method, r.URL.Path, nil)
+
+	oracle := NewOracleForNetwork(network, p.Reg)
+	if oracle == nil {
+		return false
+	}
+
+	// cache check
+	genericGasCacheMu.RLock()
+	if ent, ok := genericGasCache[network]; ok && time.Now().Before(ent.exp) {
+		defer genericGasCacheMu.RUnlock()
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(ent.b)
+		LogResponse(p.Logger, "proxy_generic_gas_cache", http.StatusOK, ent.b, start)
+		return true
+	}
+	genericGasCacheMu.RUnlock()
+
+	// External
+	if body, code, err := oracle.FetchFromOfficial(); err == nil && code/100 == 2 {
+		genericGasCacheMu.Lock()
+		genericGasCache[network] = struct {
+			b   []byte
+			exp time.Time
+		}{b: append([]byte{}, body...), exp: time.Now().Add(oracle.TTLDuration())}
+		genericGasCacheMu.Unlock()
+
+		w.Header().Set("content-type", "application/json")
+		w.WriteHeader(code)
+		_, _ = w.Write(body)
+		LogResponse(p.Logger, "proxy_generic_gas_official", code, body, start)
+		return true
+	}
+
+	// Compute from registry nodes
+	nodes := p.Reg.Best(network)
+	if len(nodes) == 0 {
+		http.Error(w, "no nodes", http.StatusServiceUnavailable)
+		LogResponse(p.Logger, "proxy_generic_gas_no_nodes", http.StatusServiceUnavailable, nil, start)
+		return true
+	}
+	var out []byte
+	for _, n := range nodes {
+		if b, err := oracle.ComputeFromRPCBytes(n); err == nil {
+			out = b
+			break
+		}
+	}
+	if len(out) == 0 {
+		http.Error(w, "gas calc failed", http.StatusBadGateway)
+		LogResponse(p.Logger, "proxy_generic_gas_calc_failed", http.StatusBadGateway, nil, start)
+		return true
+	}
+
+	genericGasCacheMu.Lock()
+	genericGasCache[network] = struct {
+		b   []byte
+		exp time.Time
+	}{b: append([]byte{}, out...), exp: time.Now().Add(oracle.TTLDuration())}
+	genericGasCacheMu.Unlock()
+
+	w.Header().Set("content-type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(out)
+	LogResponse(p.Logger, "proxy_generic_gas_local", http.StatusOK, out, start)
+	return true
 }
 
 // ==================== Arbitrum ====================
