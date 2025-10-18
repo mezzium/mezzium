@@ -8,10 +8,10 @@ nodes:
   - url: bitcoin-rpc.publicnode.com
     priority: 1
 
-  - url: https://bitcoin-mainnet.gateway.tatum.io
-    priority: 2
-    headers:
-      x-api-key: ${TATUM_API_KEY}
+#  - url: https://bitcoin-mainnet.gateway.tatum.io
+#    priority: 2
+#    headers:
+#      x-api-key: ${TATUM_API_KEY}
 
   # +# if an onion node is available:
   #  - url: http://btcnodeexample.onion

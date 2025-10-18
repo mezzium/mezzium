@@ -6,7 +6,7 @@ nodes:
     priority: 1
   - url: https://tron-rpc.publicnode.com
     priority: 1
-  - url: https://tron-mainnet.gateway.tatum.io/
-    priority: 2
-    headers:
-      x-api-key: ${TATUM_API_KEY}
+#  - url: https://tron-mainnet.gateway.tatum.io/
+#    priority: 2
+#    headers:
+#      x-api-key: ${TATUM_API_KEY}

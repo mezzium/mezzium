@@ -51,7 +51,7 @@ All admin endpoints are protected with `ADMIN_API_KEY`.
 
 ### Adapters & Shortcuts
 Mezzium provides convenient REST shortcuts for common blockchain operations:
-- `/eth/balance/{address}` → `eth_getBalance`
+- `/ethereu,/balance/{address}` → `eth_getBalance`
 - `/btc/fees` → Bitcoin fee estimation via Tatum
 - `/sol/slot` → Solana `getSlot`
 - `/nft/{contract}/{tokenId}` → ERC‑721 `ownerOf`
@@ -60,11 +60,11 @@ These adapters simplify integration by exposing user‑friendly endpoints.
 
 ### Public API Endpoints
 Predefined public endpoints are available out of the box:
-- `/proxy/eth/fee`
+- `/proxy/ethereum/fee`
 - `/proxy/btc/fees`
 - `/proxy/nft/get-all-nfts/{address}`
 - `/proxy/nft/get-nft-metadata/{contract}/{tokenId}`
-- `/proxy/eth/estimateGas`
+- `/proxy/ethereum/estimateGas`
 
 ### Leader Election & Heartbeat
 A lightweight **leader election** mechanism is built in.  
@@ -107,7 +107,7 @@ The Mezzium uses several environment variables to configure its behavior. Here's
 | `TOR_SOCKS5`              | SOCKS5 proxy address for Tor-enabled nodes                     | `127.0.0.1:9050`    |
 | `ADMIN_API_KEY`           | API key for accessing `/admin/*` endpoints                     | `changeme`          |
 | `SWAGGER_HOST`            | Hostname for Swagger UI                                        | *(optional)*        |
-| `TATUM_API_KEY`           | API key for Tatum RPC providers                                | *(required)*        |
+| `TATUM_API_KEY`           | API key for Tatum RPC providers                                | *(optional)*        |
 | `TATUM_API_KEY_TESTNET`   | Optional testnet key for Tatum (now properly redacted in logs) | *(optional)*        |
 | `ALCHEMY_API_KEY`         | API key for Alchemy RPC providers                              | *(required)*        |
 | `ALCHEMY_API_KEY_TESTNET` | Optional testnet key for Alchemy RPC providers                 | *(optional)*        |
@@ -128,5 +128,11 @@ When loading network configurations from `configs/networks/*.yaml`, any value wr
 Example:
 
 ```yaml
-headers:
-  x-api-key: ${TATUM_API_KEY}
+nodes:
+  - url: https://bitcoin-mainnet.gateway.tatum.io
+    priority: 2
+    headers:
+      x-api-key: ${TATUM_API_KEY}
+  - url: https://arb-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}
+    priority: 3
+

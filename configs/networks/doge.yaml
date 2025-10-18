@@ -2,7 +2,7 @@ route: /doge
 protocol: doge
 timeoutMs: 2500
 nodes:
-  - url: https://dogecoin-mainnet.gateway.tatum.io
-    priority: 3
-    headers:
-      x-api-key: ${TATUM_API_KEY}
+#  - url: https://dogecoin-mainnet.gateway.tatum.io
+#    priority: 3
+#    headers:
+#      x-api-key: ${TATUM_API_KEY}
