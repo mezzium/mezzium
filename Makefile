@@ -1,5 +1,6 @@
 .PHONY: buildx push run build test build-all build-platform build-go \
-	build-linux-amd64 build-linux-arm64 build-mac-amd64 build-mac-arm64 generate-evm-networks build-evm-networks
+	build-linux-amd64 build-linux-arm64 build-mac-amd64 build-mac-arm64 \
+	generate-evm-networks build-evm-networks
 
 VERSION := $(shell git describe --tags --abbrev=0 2>/dev/null || echo "0.0.1")
 COMMIT_HASH := $(shell git rev-parse --short HEAD)
@@ -32,17 +33,17 @@ run:
 
 
 # Default platforms list; can be overridden when calling:
-# make build-all PLATFORMS="linux/amd64 linux/arm64 darwin/arm64"
-PLATFORMS ?= linux/amd64 linux/arm64
+# make build-all PLATFORMS="linux/amd64 linux/arm64 darwin/amd64 darwin/arm64"
+PLATFORMS ?= linux/amd64 linux/arm64 darwin/amd64 darwin/arm64
 
 # Cross-build variables
 CGO_ENABLED ?= 0
-LDFLAGS := -X main.Version=$(VERSION) -X main.CommitHash=$(COMMIT_HASH)
+LDFLAGS := -X 'main.Version=$(VERSION)' -X 'main.CommitHash=$(COMMIT_HASH)'
 
-# Standard target: build binary for the current host configuration (same as before)
+# Standard target: build binary for the current host configuration (now uses LDFLAGS)
 build:
 	@echo " Build local [commit: $(COMMIT_HASH)]"
-	go build -ldflags "-X main.Version=${VERSION} -X main.CommitHash=${COMMIT_HASH}" -o mezzium ./cmd/app
+	CGO_ENABLED=$(CGO_ENABLED) go build -ldflags "$(LDFLAGS)" -o mezzium ./cmd/app
 
 # build-go: build for a specific GOOS/GOARCH, outputs to build/<platform>/mezzium
 # Usage: make build-go GOOS=linux GOARCH=arm64
@@ -92,7 +93,7 @@ build-mac-amd64:
 build-mac-arm64:
 	@$(MAKE) build-platform PLATFORM=darwin/arm64
 
-# Primary target name
+# Generate EVM networks
 generate-evm-networks:
 	@echo "Generating EVM networks into configs/networks"
 	@mkdir -p configs/networks
@@ -115,6 +116,7 @@ generate-evm-networks:
 
 # convenience alias (keeps naming consistent with other build targets)
 build-evm-networks: generate-evm-networks
+
 
 test:
 	@echo " Running test [commit: $(COMMIT_HASH)]"
