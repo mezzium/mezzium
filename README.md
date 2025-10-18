@@ -51,7 +51,7 @@ All admin endpoints are protected with `ADMIN_API_KEY`.
 
 ### Adapters & Shortcuts
 Mezzium provides convenient REST shortcuts for common blockchain operations:
-- `/ethereu,/balance/{address}` → `eth_getBalance`
+- `/ethereum/balance/{address}` → `eth_getBalance`
 - `/btc/fees` → Bitcoin fee estimation via Tatum
 - `/sol/slot` → Solana `getSlot`
 - `/nft/{contract}/{tokenId}` → ERC‑721 `ownerOf`
