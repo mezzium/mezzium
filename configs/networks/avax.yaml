@@ -1,6 +1,0 @@
-route: /avax
-protocol: evm
-timeoutMs: 1500
-nodes:
-  - url: https://api.avax.network/ext/bc/C/rpc
-    priority: 1

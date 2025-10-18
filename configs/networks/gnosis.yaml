@@ -1,8 +1,0 @@
-route: /gnosis
-protocol: evm
-timeoutMs: 1500
-nodes:
-  - url: https://rpc.gnosischain.com
-    priority: 1
-    headers:
-      Content-Type: application/json

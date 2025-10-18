@@ -110,7 +110,8 @@ func (p *Proxy) Serve(w http.ResponseWriter, r *http.Request) {
 		// ⏱ Таймаут на узел
 		perNodeTimeout := time.Duration(p.Reg.TimeoutMs(network)) * time.Millisecond
 		if perNodeTimeout <= 0 {
-			perNodeTimeout = defaultTimeoutFor(network)
+			// Prefer protocol-based default to avoid slug drift
+			perNodeTimeout = defaultTimeoutForProtocol(protocol)
 		}
 
 		ctx, cancel := context.WithTimeout(r.Context(), perNodeTimeout)
@@ -215,11 +216,11 @@ func buildUpstreamURL(base, tail, rawQuery string) string {
 	return u
 }
 
-func defaultTimeoutFor(network string) time.Duration {
-	switch strings.ToLower(network) {
+func defaultTimeoutForProtocol(protocol string) time.Duration {
+	switch strings.ToLower(protocol) {
 	case "sol":
 		return 800 * time.Millisecond
-	case "eth", "evm", "bsc", "polygon", "fantom":
+	case "evm":
 		return 1500 * time.Millisecond
 	case "trx":
 		return 1500 * time.Millisecond

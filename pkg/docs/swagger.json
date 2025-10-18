@@ -6,7 +6,8 @@
     "description": "Proxy JSON-RPC and REST requests to EVM, BTC-like, TRON, Solana and other networks with fail-fast per-node timeouts, health checks, gossip discovery, and admin API for runtime network management."
   },
   "servers": [
-    { "url": "https://127.0.0.1:8080", "description": "Local default" }
+    { "url": "https://api.mezzium.net", "description": "api.mezzium.net" },
+    { "url": "http://127.0.0.1:8080", "description": "Local default" }
   ],
   "tags": [
     { "name": "Public", "description": "Public API endpoints" },
@@ -83,7 +84,7 @@
       "ActiveNetwork": {
         "type": "object",
         "properties": {
-          "route": { "type": "string", "example": "/eth" },
+          "route": { "type": "string", "example": "/ethereum" },
           "protocol": { "type": "string", "enum": ["evm", "btc", "trx", "sol", "doge", "ltc"] },
           "timeoutMs": { "type": "integer", "example": 1500 },
           "nodes": { "type": "array", "items": { "$ref": "#/components/schemas/NodeInfo" } }
@@ -206,8 +207,8 @@
                   "additionalProperties": { "$ref": "#/components/schemas/ActiveNetwork" }
                 },
                 "example": {
-                  "eth": {
-                    "route": "/eth",
+                  "ethereum": {
+                    "route": "/ethereum",
                     "protocol": "evm",
                     "timeoutMs": 1500,
                     "nodes": [
@@ -240,7 +241,7 @@
             "in": "path",
             "required": true,
             "schema": { "type": "string" },
-            "example": "eth"
+            "example": "ethereum"
           }
         ],
         "requestBody": {
@@ -384,7 +385,7 @@
                 "from": "node-1",
                 "networks": [
                   {
-                    "name": "eth",
+                    "name": "ethereum",
                     "protocol": "evm",
                     "nodes": [ { "url": "https://eth.llamarpc.com", "priority": 1, "protocol": "evm", "alive": true, "ping": 123 } ],
                     "ts": 1732522800
@@ -462,7 +463,7 @@
         "security": [{ "AdminKey": [] }],
         "summary": "Add a node to an existing network",
         "parameters": [
-          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "eth" }
+          { "name": "network", "in": "path", "required": true, "schema": { "type": "string" }, "example": "ethereum" }
         ],
         "requestBody": {
           "required": true,
@@ -574,7 +575,7 @@
         }
       }
     },
-    "/proxy/eth/fee": {
+    "/proxy/ethereum/fee": {
       "get": {
         "tags": ["Public"],
         "summary": "Get current Ethereum fees from Tatum",
@@ -590,7 +591,7 @@
         }
       }
     },
-    "/proxy/eth/maxPriorityFee": {
+    "/proxy/ethereum/maxPriorityFee": {
       "get": {
         "tags": ["Public"],
         "summary": "Get eth_maxPriorityFeePerGas from a healthy ETH node",
@@ -606,7 +607,7 @@
         }
       }
     },
-    "/proxy/eth/estimateGas": {
+    "/proxy/ethereum/estimateGas": {
       "post": {
         "tags": ["Public"],
         "summary": "Estimate gas for a transaction via eth_estimateGas",
@@ -620,10 +621,10 @@
               },
               "example": [
                 {
-                  "from": "0xabc...",
-                  "to": "0xdef...",
+                  "from": "0x0000000000000000000000000000000000000000",
+                  "to": "0x0000000000000000000000000000000000000000",
                   "value": "0x1",
-                  "data": "0x..."
+                  "data": "0x"
                 }
               ]
             }

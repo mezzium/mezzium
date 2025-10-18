@@ -63,11 +63,11 @@ func (c *Checker) perNodeTimeout(protocol string) time.Duration {
 	return tmo
 }
 
-func defaultTimeoutFor(network string) time.Duration {
-	switch strings.ToLower(network) {
+func defaultTimeoutFor(protocol string) time.Duration {
+	switch strings.ToLower(protocol) {
 	case "sol":
 		return 800 * time.Millisecond
-	case "eth", "evm", "bsc", "polygon", "fantom":
+	case "evm":
 		return 1500 * time.Millisecond
 	case "trx":
 		return 1500 * time.Millisecond

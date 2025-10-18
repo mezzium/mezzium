@@ -1,8 +1,0 @@
-route: /wan
-protocol: evm
-timeoutMs: 1500
-nodes:
-  - url: https://gwan-ssl.wandevs.org:56891
-    priority: 1
-    headers:
-      Content-Type: application/json

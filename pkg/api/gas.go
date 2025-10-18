@@ -20,9 +20,9 @@ func (p *Proxy) TryServeGasFee(w http.ResponseWriter, r *http.Request, network, 
 	switch strings.ToLower(network) {
 	case "polygon":
 		return p.servePolygonGas(w, r)
-	case "eth":
+	case "ethereum":
 		return p.serveEthGas(w, r)
-	case "bsc":
+	case "binance":
 		return p.serveBscGas(w, r)
 	case "arbitrum":
 		return p.serveArbitrumGas(w, r)
@@ -174,7 +174,7 @@ func (p *Proxy) serveEthGas(w http.ResponseWriter, r *http.Request) bool {
 
 	ethGasOnce.Do(func() {
 		all := p.Reg.All()
-		if st, ok := all["eth"]; ok {
+		if st, ok := all["ethereum"]; ok {
 			ethOracle = oracle.NewEthGasOracle(st)
 		} else {
 			ethOracle = oracle.NewEthGasOracle(nil)
@@ -210,10 +210,10 @@ func (p *Proxy) serveEthGas(w http.ResponseWriter, r *http.Request) bool {
 		return true
 	}
 
-	nodes := p.Reg.Best("eth")
+	nodes := p.Reg.Best("ethereum")
 	if len(nodes) == 0 {
-		http.Error(w, "no eth nodes", http.StatusServiceUnavailable)
-		LogResponse(p.Logger, "proxy_eth_gas_no_nodes", http.StatusServiceUnavailable, nil, start)
+		http.Error(w, "no ethereum nodes", http.StatusServiceUnavailable)
+		LogResponse(p.Logger, "proxy_ethereum_gas_no_nodes", http.StatusServiceUnavailable, nil, start)
 		return true
 	}
 
@@ -228,7 +228,7 @@ func (p *Proxy) serveEthGas(w http.ResponseWriter, r *http.Request) bool {
 	}
 	if len(out) == 0 {
 		http.Error(w, "gas calc failed", http.StatusBadGateway)
-		LogResponse(p.Logger, "proxy_eth_gas_calc_failed", http.StatusBadGateway, nil, start)
+		LogResponse(p.Logger, "proxy_ethereum_gas_calc_failed", http.StatusBadGateway, nil, start)
 		return true
 	}
 
@@ -240,16 +240,16 @@ func (p *Proxy) serveEthGas(w http.ResponseWriter, r *http.Request) bool {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(out)
-	LogResponse(p.Logger, "proxy_eth_gas_local", http.StatusOK, out, start)
+	LogResponse(p.Logger, "proxy_ethereum_gas_local", http.StatusOK, out, start)
 	return true
 }
 func (p *Proxy) serveBscGas(w http.ResponseWriter, r *http.Request) bool {
-	start := LogRequest(p.Logger, "proxy_bsc_gas", r.Method, r.URL.Path, nil)
+	start := LogRequest(p.Logger, "proxy_binance_gas", r.Method, r.URL.Path, nil)
 
 	// Lazy init
 	bscGasOnce.Do(func() {
 		all := p.Reg.All()
-		if st, ok := all["bsc"]; ok {
+		if st, ok := all["binance"]; ok {
 			bscOracle = oracle.NewBscGasOracle(st)
 		} else {
 			bscOracle = oracle.NewBscGasOracle(nil)
@@ -265,7 +265,7 @@ func (p *Proxy) serveBscGas(w http.ResponseWriter, r *http.Request) bool {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write(cached)
-		LogResponse(p.Logger, "proxy_bsc_gas_cache", http.StatusOK, cached, start)
+		LogResponse(p.Logger, "proxy_binance_gas_cache", http.StatusOK, cached, start)
 		return true
 	}
 	bscGasCache.mu.RUnlock()
@@ -280,15 +280,15 @@ func (p *Proxy) serveBscGas(w http.ResponseWriter, r *http.Request) bool {
 		w.Header().Set("content-type", "application/json")
 		w.WriteHeader(code)
 		_, _ = w.Write(body)
-		LogResponse(p.Logger, "proxy_bsc_gas_official", code, body, start)
+		LogResponse(p.Logger, "proxy_binance_gas_official", code, body, start)
 		return true
 	}
 
 	// Local compute
-	nodes := p.Reg.Best("bsc")
+	nodes := p.Reg.Best("binance")
 	if len(nodes) == 0 {
-		http.Error(w, "no bsc nodes", http.StatusServiceUnavailable)
-		LogResponse(p.Logger, "proxy_bsc_gas_no_nodes", http.StatusServiceUnavailable, nil, start)
+		http.Error(w, "no binance nodes", http.StatusServiceUnavailable)
+		LogResponse(p.Logger, "proxy_binance_gas_no_nodes", http.StatusServiceUnavailable, nil, start)
 		return true
 	}
 	var out []byte
@@ -302,7 +302,7 @@ func (p *Proxy) serveBscGas(w http.ResponseWriter, r *http.Request) bool {
 	}
 	if len(out) == 0 {
 		http.Error(w, "gas calc failed", http.StatusBadGateway)
-		LogResponse(p.Logger, "proxy_bsc_gas_calc_failed", http.StatusBadGateway, nil, start)
+		LogResponse(p.Logger, "proxy_binance_gas_calc_failed", http.StatusBadGateway, nil, start)
 		return true
 	}
 	bscGasCache.mu.Lock()
@@ -313,7 +313,7 @@ func (p *Proxy) serveBscGas(w http.ResponseWriter, r *http.Request) bool {
 	w.Header().Set("content-type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write(out)
-	LogResponse(p.Logger, "proxy_bsc_gas_local", http.StatusOK, out, start)
+	LogResponse(p.Logger, "proxy_binance_gas_local", http.StatusOK, out, start)
 	return true
 }
 func (p *Proxy) serveArbitrumGas(w http.ResponseWriter, r *http.Request) bool {

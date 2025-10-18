@@ -7,11 +7,16 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
+	"time"
 
+	"github.com/shuliakovsky/mezzium/pkg/oracle"
 	"github.com/shuliakovsky/mezzium/pkg/registry"
 	"github.com/shuliakovsky/mezzium/pkg/secrets"
 )
+
+var evmThrottler = NewThrottler()
 
 type Public struct {
 	Reg    *registry.Registry
@@ -25,31 +30,14 @@ func NewPublic(reg *registry.Registry, logger *zap.Logger) *Public {
 func (p *Public) NetworkFees(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_network_fees", r.Method, r.URL.Path, nil)
 
-	nodes := p.Reg.Best("eth")
+	// prefer registry node pool for ethereum
+	nodes := p.Reg.Best("ethereum")
 	if len(nodes) == 0 {
 		http.Error(w, "no healthy ETH nodes", http.StatusServiceUnavailable)
 		return
 	}
-	target := nodes[0]
-	type rpcReq struct {
-		Jsonrpc string      `json:"jsonrpc"`
-		Method  string      `json:"method"`
-		Params  interface{} `json:"params,omitempty"`
-		ID      int         `json:"id"`
-	}
-	req1, _ := json.Marshal(rpcReq{Jsonrpc: "2.0", Method: "eth_feeHistory", Params: []any{"0x1", "latest", []any{}}, ID: 1})
-	req2, _ := json.Marshal(rpcReq{Jsonrpc: "2.0", Method: "eth_maxPriorityFeePerGas", ID: 2})
 
-	client := &http.Client{}
-	r1, _ := http.NewRequest("POST", target.URL, bytes.NewReader(req1))
-	r2, _ := http.NewRequest("POST", target.URL, bytes.NewReader(req2))
-	for k, v := range target.Headers {
-		r1.Header.Set(k, v)
-		r2.Header.Set(k, v)
-	}
-	r1.Header.Set("content-type", "application/json")
-	r2.Header.Set("content-type", "application/json")
-
+	// Try nodes grouped by priority with throttling
 	type feeHistory struct {
 		Result struct {
 			BaseFeePerGas []string `json:"baseFeePerGas"`
@@ -58,24 +46,91 @@ func (p *Public) NetworkFees(w http.ResponseWriter, r *http.Request) {
 	type maxPrio struct {
 		Result string `json:"result"`
 	}
+
+	// group by priority
+	groups := map[int][]registry.NodeWithPing{}
+	priorities := []int{}
+	for _, n := range nodes {
+		if evmThrottler.IsThrottled(n.URL) {
+			continue
+		}
+		if _, ok := groups[n.Priority]; !ok {
+			priorities = append(priorities, n.Priority)
+		}
+		groups[n.Priority] = append(groups[n.Priority], n)
+	}
+	// sort priorities ascending
+	sort.Ints(priorities)
+
 	var fh feeHistory
 	var mp maxPrio
+	found := false
 
-	resp1, err1 := client.Do(r1)
-	if err1 != nil || resp1.StatusCode/100 != 2 {
-		http.Error(w, "feeHistory failed", http.StatusBadGateway)
+CLIENT_LOOP:
+	for _, pr := range priorities {
+		for _, n := range groups[pr] {
+			// Prepare requests
+			client := &http.Client{Timeout: 5 * time.Second}
+			target := n.URL
+
+			req1, _ := http.NewRequest("POST", target, bytes.NewReader([]byte(`{"jsonrpc":"2.0","method":"eth_feeHistory","params":["0x1","latest",[]],"id":1}`)))
+			req1.Header.Set("content-type", "application/json")
+			for k, v := range n.Headers {
+				req1.Header.Set(k, v)
+			}
+			resp1, err1 := client.Do(req1)
+			if err1 != nil {
+				p.Logger.Warn("networkfees_rpc_error", zap.String("upstream", secrets.RedactString(target)), zap.Error(err1))
+				continue
+			}
+			body1, _ := io.ReadAll(resp1.Body)
+			resp1.Body.Close()
+			if isRateLimited(resp1, body1) {
+				evmThrottler.Mark429(target)
+				p.Logger.Warn("networkfees_upstream_429", zap.String("upstream", secrets.RedactString(target)))
+				continue
+			}
+			if resp1.StatusCode/100 != 2 {
+				continue
+			}
+			if json.Unmarshal(body1, &fh) != nil {
+				continue
+			}
+
+			req2, _ := http.NewRequest("POST", target, bytes.NewReader([]byte(`{"jsonrpc":"2.0","method":"eth_maxPriorityFeePerGas","id":2}`)))
+			req2.Header.Set("content-type", "application/json")
+			for k, v := range n.Headers {
+				req2.Header.Set(k, v)
+			}
+			resp2, err2 := client.Do(req2)
+			if err2 != nil {
+				p.Logger.Warn("networkfees_rpc_error2", zap.String("upstream", secrets.RedactString(target)), zap.Error(err2))
+				continue
+			}
+			body2, _ := io.ReadAll(resp2.Body)
+			resp2.Body.Close()
+			if isRateLimited(resp2, body2) {
+				evmThrottler.Mark429(target)
+				p.Logger.Warn("networkfees_upstream_429", zap.String("upstream", secrets.RedactString(target)))
+				continue
+			}
+			if resp2.StatusCode/100 != 2 {
+				continue
+			}
+			if json.Unmarshal(body2, &mp) != nil {
+				continue
+			}
+
+			found = true
+			break CLIENT_LOOP
+		}
+	}
+
+	if !found {
+		http.Error(w, "fee calc failed", http.StatusBadGateway)
+		LogResponse(p.Logger, "public_network_fees", http.StatusBadGateway, nil, start)
 		return
 	}
-	defer resp1.Body.Close()
-	_ = json.NewDecoder(resp1.Body).Decode(&fh)
-
-	resp2, err2 := client.Do(r2)
-	if err2 != nil || resp2.StatusCode/100 != 2 {
-		http.Error(w, "maxPriority failed", http.StatusBadGateway)
-		return
-	}
-	defer resp2.Body.Close()
-	_ = json.NewDecoder(resp2.Body).Decode(&mp)
 
 	respBody, _ := json.Marshal(map[string]any{
 		"baseFee":        first(fh.Result.BaseFeePerGas),
@@ -101,6 +156,7 @@ func (p *Public) ActiveNodes(w http.ResponseWriter, r *http.Request) {
 			}
 			arr := make([]liteNode, 0, len(st.Best))
 			for _, n := range st.Best {
+				// Mask any secrets found in URL via secrets.RedactString
 				arr = append(arr, liteNode{
 					URL:      secrets.RedactString(n.URL),
 					Priority: n.Priority,
@@ -146,18 +202,134 @@ func (p *Public) BTCFees(w http.ResponseWriter, r *http.Request) {
 	LogResponse(p.Logger, "public_btc_fees", http.StatusOK, nil, start)
 }
 
-// GET /proxy/eth/fee → Tatum
+// GET /proxy/ethereum/fee → Tatum
+// GET /proxy/ethereum/fee — try registry nodes first, fallback to ExternalURL (if configured)
+// GET /proxy/ethereum/fee — try registry nodes first, fallback to ExternalURL (if configured)
 func (p *Public) EthFee(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_eth_fee", r.Method, r.URL.Path, nil)
 	if r.Method != http.MethodGet {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	forwardExternalAPI(w, "https://api.tatum.io/v3/blockchain/fee/ETH", "TATUM_API_KEY")
-	LogResponse(p.Logger, "public_eth_fee", http.StatusOK, nil, start)
+
+	nodes := p.Reg.Best("ethereum")
+	// try nodes grouped by priority with throttling
+	if len(nodes) > 0 {
+		groups := map[int][]registry.NodeWithPing{}
+		priorities := []int{}
+		for _, n := range nodes {
+			if evmThrottler.IsThrottled(n.URL) {
+				continue
+			}
+			if _, ok := groups[n.Priority]; !ok {
+				priorities = append(priorities, n.Priority)
+			}
+			groups[n.Priority] = append(groups[n.Priority], n)
+		}
+		sort.Ints(priorities)
+
+		type feeHistory struct {
+			Result struct {
+				BaseFeePerGas []string `json:"baseFeePerGas"`
+			} `json:"result"`
+		}
+		type maxPrio struct {
+			Result string `json:"result"`
+		}
+
+		var fh feeHistory
+		var mp maxPrio
+
+		for _, pr := range priorities {
+			for _, n := range groups[pr] {
+				target := n.URL
+				client := &http.Client{Timeout: 5 * time.Second}
+
+				// eth_feeHistory
+				req1Body := []byte(`{"jsonrpc":"2.0","method":"eth_feeHistory","params":["0x1","latest",[]],"id":1}`)
+				req1, _ := http.NewRequest("POST", target, bytes.NewReader(req1Body))
+				req1.Header.Set("content-type", "application/json")
+				for k, v := range n.Headers {
+					req1.Header.Set(k, v)
+				}
+				resp1, err1 := client.Do(req1)
+				if err1 != nil {
+					p.Logger.Warn("eth_fee_rpc_err", zap.String("upstream", secrets.RedactString(target)), zap.Error(err1))
+					continue
+				}
+				b1, _ := io.ReadAll(resp1.Body)
+				resp1.Body.Close()
+				if isRateLimited(resp1, b1) {
+					evmThrottler.Mark429(target)
+					p.Logger.Warn("eth_fee_upstream_429", zap.String("upstream", secrets.RedactString(target)))
+					continue
+				}
+				if resp1.StatusCode/100 != 2 {
+					continue
+				}
+				if json.Unmarshal(b1, &fh) != nil {
+					continue
+				}
+
+				// eth_maxPriorityFeePerGas
+				req2Body := []byte(`{"jsonrpc":"2.0","method":"eth_maxPriorityFeePerGas","id":2}`)
+				req2, _ := http.NewRequest("POST", target, bytes.NewReader(req2Body))
+				req2.Header.Set("content-type", "application/json")
+				for k, v := range n.Headers {
+					req2.Header.Set(k, v)
+				}
+				resp2, err2 := client.Do(req2)
+				if err2 != nil {
+					p.Logger.Warn("eth_fee_rpc_err2", zap.String("upstream", secrets.RedactString(target)), zap.Error(err2))
+					continue
+				}
+				b2, _ := io.ReadAll(resp2.Body)
+				resp2.Body.Close()
+				if isRateLimited(resp2, b2) {
+					evmThrottler.Mark429(target)
+					p.Logger.Warn("eth_fee_upstream_429", zap.String("upstream", secrets.RedactString(target)))
+					continue
+				}
+				if resp2.StatusCode/100 != 2 {
+					continue
+				}
+				if json.Unmarshal(b2, &mp) != nil {
+					continue
+				}
+
+				// success: build response similar to previous shape
+				respBody, _ := json.Marshal(map[string]any{
+					"baseFee":        first(fh.Result.BaseFeePerGas),
+					"maxPriorityFee": mp.Result,
+				})
+				w.Header().Set("content-type", "application/json")
+				w.WriteHeader(http.StatusOK)
+				_, _ = w.Write(respBody)
+				LogResponse(p.Logger, "public_eth_fee", http.StatusOK, respBody, start)
+				// reset throttle on success
+				evmThrottler.Reset(target)
+				// return from handler on first success
+				return
+			}
+		}
+	}
+
+	// last resort: try ExternalURL from network gas config (if configured)
+	if gc := p.Reg.GasConfigOf("ethereum"); gc != nil && gc.ExternalURL != "" {
+		if body, code, err := (&oracle.EthGasOracle{ExternalURL: gc.ExternalURL}).FetchFromOfficial(); err == nil && code/100 == 2 {
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(code)
+			_, _ = w.Write(body)
+			LogResponse(p.Logger, "public_eth_fee_official", code, body, start)
+			return
+		}
+	}
+
+	http.Error(w, "fee calc failed", http.StatusBadGateway)
+	LogResponse(p.Logger, "public_eth_fee", http.StatusBadGateway, nil, start)
 }
 
-// GET /proxy/eth/maxPriorityFee
+// GET /proxy/ethereum/maxPriorityFee
 func (p *Public) EthMaxPriorityFee(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_eth_max_priority_fee", r.Method, r.URL.Path, nil)
 
@@ -165,29 +337,62 @@ func (p *Public) EthMaxPriorityFee(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	nodes := p.Reg.Best("eth")
+	nodes := p.Reg.Best("ethereum")
 	if len(nodes) == 0 {
 		http.Error(w, "no healthy ETH nodes", http.StatusServiceUnavailable)
 		return
 	}
-	target := nodes[0]
-	payload := `{"jsonrpc":"2.0","id":1,"method":"eth_maxPriorityFeePerGas","params":[]}`
-	req, _ := http.NewRequest(http.MethodPost, target.URL, strings.NewReader(payload))
-	for k, v := range target.Headers {
-		req.Header.Set(k, v)
+
+	// group by priority
+	groups := map[int][]registry.NodeWithPing{}
+	priorities := []int{}
+	for _, n := range nodes {
+		if evmThrottler.IsThrottled(n.URL) {
+			continue
+		}
+		if _, ok := groups[n.Priority]; !ok {
+			priorities = append(priorities, n.Priority)
+		}
+		groups[n.Priority] = append(groups[n.Priority], n)
 	}
-	req.Header.Set("content-type", "application/json")
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		http.Error(w, "rpc call failed", http.StatusBadGateway)
-		return
+	sort.Ints(priorities)
+
+	for _, pr := range priorities {
+		for _, n := range groups[pr] {
+			payload := `{"jsonrpc":"2.0","id":1,"method":"eth_maxPriorityFeePerGas","params":[]}`
+			client := &http.Client{Timeout: 5 * time.Second}
+			req, _ := http.NewRequest(http.MethodPost, n.URL, strings.NewReader(payload))
+			for k, v := range n.Headers {
+				req.Header.Set(k, v)
+			}
+			req.Header.Set("content-type", "application/json")
+			resp, err := client.Do(req)
+			if err != nil {
+				p.Logger.Warn("eth_maxPriority_fee_rpc_error", zap.String("upstream", secrets.RedactString(n.URL)), zap.Error(err))
+				continue
+			}
+			b, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if isRateLimited(resp, b) {
+				evmThrottler.Mark429(n.URL)
+				p.Logger.Warn("eth_maxPriority_upstream_429", zap.String("upstream", secrets.RedactString(n.URL)))
+				continue
+			}
+			if resp.StatusCode/100 != 2 {
+				continue
+			}
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(resp.StatusCode)
+			_, _ = w.Write(b)
+			LogResponse(p.Logger, "public_eth_max_priority_fee", resp.StatusCode, b, start)
+			// success -> reset throttle for this node
+			evmThrottler.Reset(n.URL)
+			return
+		}
 	}
-	defer resp.Body.Close()
-	respBody, _ := io.ReadAll(resp.Body)
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	w.Write(respBody)
-	LogResponse(p.Logger, "public_eth_max_priority_fee", resp.StatusCode, respBody, start)
+
+	http.Error(w, "no healthy ETH nodes available", http.StatusBadGateway)
+	LogResponse(p.Logger, "public_eth_max_priority_fee", http.StatusBadGateway, nil, start)
 }
 
 // GET /proxy/nft/get-all-nfts/{address}
@@ -235,6 +440,7 @@ func (p *Public) NFTGetNFTMetadata(w http.ResponseWriter, r *http.Request) {
 }
 
 // POST /proxy/eth/estimateGas
+// POST /proxy/ethereum/estimateGas
 func (p *Public) EthEstimateGas(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 	_ = r.Body.Close()
@@ -244,52 +450,99 @@ func (p *Public) EthEstimateGas(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
-	nodes := p.Reg.Best("eth")
+
+	nodes := p.Reg.Best("ethereum")
 	if len(nodes) == 0 {
 		http.Error(w, "no healthy ETH nodes", http.StatusServiceUnavailable)
 		return
 	}
 
-	// create JSON-RPC request
+	// If client sent full JSON-RPC object (has "jsonrpc" field) — forward it as-is.
+	if isJSONRPC(body) {
+		tryForwardJSONRPCToNodes(p, nodes, body, start, w, "public_eth_estimate_gas")
+		return
+	}
+
+	// Otherwise treat body as params (array or single params object) and create eth_estimateGas payload
+	var params any
+	if len(body) > 0 {
+		if err := json.Unmarshal(body, &params); err != nil {
+			// Invalid client payload
+			http.Error(w, "invalid request body", http.StatusBadRequest)
+			return
+		}
+	} else {
+		params = []any{}
+	}
+
 	payload := map[string]any{
 		"jsonrpc": "2.0",
 		"id":      1,
 		"method":  "eth_estimateGas",
-		"params":  []any{},
+		"params":  params,
 	}
-	if len(body) > 0 {
-		// trying parse as params
-		var params any
-		if err := json.Unmarshal(body, &params); err == nil {
-			payload["params"] = params
-		} else {
-			// fallback — as object
-			payload["params"] = []any{json.RawMessage(body)}
+	b, _ := json.Marshal(payload)
+
+	// Try nodes grouped by priority with throttling (same approach as in other methods)
+	groups := map[int][]registry.NodeWithPing{}
+	priorities := []int{}
+	for _, n := range nodes {
+		if evmThrottler.IsThrottled(n.URL) {
+			continue
+		}
+		if _, ok := groups[n.Priority]; !ok {
+			priorities = append(priorities, n.Priority)
+		}
+		groups[n.Priority] = append(groups[n.Priority], n)
+	}
+	sort.Ints(priorities)
+
+	for _, pr := range priorities {
+		for _, n := range groups[pr] {
+			client := &http.Client{Timeout: 8 * time.Second}
+			req, _ := http.NewRequest(http.MethodPost, n.URL, bytes.NewReader(b))
+			req.Header.Set("content-type", "application/json")
+			for k, v := range n.Headers {
+				req.Header.Set(k, v)
+			}
+			resp, err := client.Do(req)
+			if err != nil {
+				p.Logger.Warn("eth_estimate_rpc_error", zap.String("upstream", secrets.RedactString(n.URL)), zap.Error(err))
+				continue
+			}
+			respBody, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if isRateLimited(resp, respBody) {
+				evmThrottler.Mark429(n.URL)
+				p.Logger.Warn("eth_estimate_upstream_429", zap.String("upstream", secrets.RedactString(n.URL)))
+				continue
+			}
+			if resp.StatusCode/100 != 2 {
+				continue
+			}
+			// success
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(resp.StatusCode)
+			_, _ = w.Write(respBody)
+			evmThrottler.Reset(n.URL)
+			LogResponse(p.Logger, "public_eth_estimate_gas", resp.StatusCode, respBody, start)
+			return
 		}
 	}
 
-	b, _ := json.Marshal(payload)
-
-	// Send to the first healthy ETH node.
-	tatumURL := "https://api.tatum.io/v3/blockchain/node/ethereum-mainnet"
-	req, _ := http.NewRequest(http.MethodPost, tatumURL, bytes.NewReader(b))
-	req.Header.Set("content-type", "application/json")
-	if k := os.Getenv("TATUM_API_KEY"); k != "" {
-		req.Header.Set("x-api-key", k)
+	// try external gas station as last resort
+	if gc := p.Reg.GasConfigOf("ethereum"); gc != nil && gc.ExternalURL != "" {
+		if body, code, err := (&oracle.EthGasOracle{ExternalURL: gc.ExternalURL}).FetchFromOfficial(); err == nil && code/100 == 2 {
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(code)
+			_, _ = w.Write(body)
+			LogResponse(p.Logger, "public_eth_estimate_gas_official", code, body, start)
+			return
+		}
 	}
-	resp, err := http.DefaultClient.Do(req)
-	if err != nil {
-		http.Error(w, "rpc call failed", http.StatusBadGateway)
-		return
-	}
-	defer resp.Body.Close()
 
-	respBody, _ := io.ReadAll(resp.Body)
-	w.Header().Set("content-type", "application/json")
-	w.WriteHeader(resp.StatusCode)
-	_, _ = w.Write(respBody)
-
-	LogResponse(p.Logger, "public_eth_estimate_gas", resp.StatusCode, respBody, start)
+	http.Error(w, "estimateGas failed", http.StatusBadGateway)
+	LogResponse(p.Logger, "public_eth_estimate_gas", http.StatusBadGateway, nil, start)
 }
 
 // first returns the first element of the slice, or an empty string if the slice is empty.
@@ -356,4 +609,71 @@ func (p *Public) BTCBalance(w http.ResponseWriter, r *http.Request) {
 	url := "https://api.tatum.io/v3/bitcoin/address/balance/" + addr
 	forwardExternalAPI(w, url, "TATUM_API_KEY")
 	LogResponse(p.Logger, "public_btc_balance", http.StatusOK, nil, start)
+}
+
+// isJSONRPC checks whether body looks like a JSON-RPC object.
+func isJSONRPC(b []byte) bool {
+	if len(b) == 0 {
+		return false
+	}
+	var m map[string]any
+	if json.Unmarshal(b, &m) == nil {
+		if _, ok := m["jsonrpc"]; ok {
+			return true
+		}
+	}
+	return false
+}
+
+// tryForwardJSONRPCToNodes forwards raw JSON-RPC payload to nodes (grouped by priority)
+// and writes first successful response back. Reuses throttling logic.
+func tryForwardJSONRPCToNodes(p *Public, nodes []registry.NodeWithPing, raw []byte, started time.Time, w http.ResponseWriter, logTag string) {
+	groups := map[int][]registry.NodeWithPing{}
+	priorities := []int{}
+	for _, n := range nodes {
+		if evmThrottler.IsThrottled(n.URL) {
+			continue
+		}
+		if _, ok := groups[n.Priority]; !ok {
+			priorities = append(priorities, n.Priority)
+		}
+		groups[n.Priority] = append(groups[n.Priority], n)
+	}
+	sort.Ints(priorities)
+
+	for _, pr := range priorities {
+		for _, n := range groups[pr] {
+			client := &http.Client{Timeout: 8 * time.Second}
+			req, _ := http.NewRequest(http.MethodPost, n.URL, bytes.NewReader(raw))
+			req.Header.Set("content-type", "application/json")
+			for k, v := range n.Headers {
+				req.Header.Set(k, v)
+			}
+			resp, err := client.Do(req)
+			if err != nil {
+				p.Logger.Warn(logTag+"_rpc_error", zap.String("upstream", secrets.RedactString(n.URL)), zap.Error(err))
+				continue
+			}
+			respBody, _ := io.ReadAll(resp.Body)
+			resp.Body.Close()
+			if isRateLimited(resp, respBody) {
+				evmThrottler.Mark429(n.URL)
+				p.Logger.Warn(logTag+"_upstream_429", zap.String("upstream", secrets.RedactString(n.URL)))
+				continue
+			}
+			if resp.StatusCode/100 != 2 {
+				continue
+			}
+			// success
+			w.Header().Set("content-type", "application/json")
+			w.WriteHeader(resp.StatusCode)
+			_, _ = w.Write(respBody)
+			evmThrottler.Reset(n.URL)
+			LogResponse(p.Logger, logTag, resp.StatusCode, respBody, started)
+			return
+		}
+	}
+	// none succeeded
+	http.Error(w, "all upstreams failed", http.StatusBadGateway)
+	LogResponse(p.Logger, logTag, http.StatusBadGateway, nil, started)
 }
