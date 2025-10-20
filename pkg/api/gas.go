@@ -74,7 +74,7 @@ var (
 	}{}
 )
 
-// NewOracleForNetwork: minimal router by network name / protocol
+// NewOracleForNetwork minimal router by network name / protocol
 func NewOracleForNetwork(name string, reg *registry.Registry) GasOracle {
 	all := reg.All()
 	st, ok := all[name]

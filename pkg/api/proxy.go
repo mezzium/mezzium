@@ -84,7 +84,7 @@ func (p *Proxy) Serve(w http.ResponseWriter, r *http.Request) {
 
 	start := LogRequest(p.Logger, "proxy", r.Method, r.URL.Path, origBody)
 
-	// 🔧 Адаптация запроса
+	// Адаптация запроса
 	protocol := p.Reg.ProtocolOf(network)
 	baseURL := candidates[0].URL
 	ad := adapters.Adapt(network, protocol, baseURL, tail, r.Method, r.Header, origBody, p.Logger)
@@ -178,7 +178,7 @@ func (p *Proxy) Serve(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
-		// ✅ Успешный ответ
+		// Успешный ответ
 		for k, vv := range resp.Header {
 			for _, v := range vv {
 				w.Header().Add(k, v)

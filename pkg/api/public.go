@@ -191,7 +191,7 @@ func (p *Public) EthFee(w http.ResponseWriter, r *http.Request) {
 	LogResponse(p.Logger, "public_eth_fee", http.StatusBadGateway, nil, start)
 }
 
-// GET /ethereum/maxPriorityFee
+// EthMaxPriorityFee GET /ethereum/maxPriorityFee
 func (p *Public) EthMaxPriorityFee(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_eth_max_priority_fee", r.Method, r.URL.Path, nil)
 
@@ -257,7 +257,7 @@ func (p *Public) EthMaxPriorityFee(w http.ResponseWriter, r *http.Request) {
 	LogResponse(p.Logger, "public_eth_max_priority_fee", http.StatusBadGateway, nil, start)
 }
 
-// GET /nft/get-all-nfts/{address} → через адаптер nft (EVM RPC)
+// NFTGetAllNFTs GET /nft/get-all-nfts/{address} → через адаптер nft (EVM RPC)
 func (p *Public) NFTGetAllNFTs(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_nft_get_all", r.Method, r.URL.Path, nil)
 	const prefix = "/ethereum/nft/get-all-nfts/"
@@ -335,7 +335,7 @@ func (p *Public) NFTGetAllNFTs(w http.ResponseWriter, r *http.Request) {
 	LogResponse(p.Logger, "public_nft_get_all", http.StatusOK, nil, start)
 }
 
-// GET /ethereum/nft/get-nft-metadata/{contract}/{tokenId} → tokenURI via RPC
+// NFTGetNFTMetadata GET /ethereum/nft/get-nft-metadata/{contract}/{tokenId} → tokenURI via RPC
 func (p *Public) NFTGetNFTMetadata(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_nft_get_metadata", r.Method, r.URL.Path, nil)
 	const prefix = "/ethereum/nft/get-nft-metadata/"
@@ -365,7 +365,7 @@ func (p *Public) NFTGetNFTMetadata(w http.ResponseWriter, r *http.Request) {
 	tryForwardJSONRPCToNodes(p, nodes, payload, start, w, "public_nft_get_metadata")
 }
 
-// GET /btc/balance/{address} → через пул BTC‑нод
+// BTCBalance GET /btc/balance/{address} → через пул BTC‑нод
 func (p *Public) BTCBalance(w http.ResponseWriter, r *http.Request) {
 	start := LogRequest(p.Logger, "public_btc_balance", r.Method, r.URL.Path, nil)
 	if r.Method != http.MethodGet {

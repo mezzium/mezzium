@@ -77,7 +77,7 @@ func isHexAddress(s string) bool {
 	return err == nil
 }
 
-// BuildOwnerOfData: ownerOf(uint256) → 0x6352211e + tokenId 32-byte left-padded
+// BuildOwnerOfData ownerOf(uint256) → 0x6352211e + tokenId 32-byte left-padded
 func BuildOwnerOfData(tokenId string) string {
 	selector := "0x6352211e"
 
@@ -126,7 +126,7 @@ func NormalizeHex(s string) string {
 	return "0x" + s
 }
 
-// BuildTokenURIData: tokenURI(uint256) → 0xc87b56dd + tokenId 32-byte left-padded
+// BuildTokenURIData tokenURI(uint256) → 0xc87b56dd + tokenId 32-byte left-padded
 func BuildTokenURIData(tokenId string) string {
 	selector := "0xc87b56dd"
 	id := new(big.Int)
@@ -139,7 +139,7 @@ func BuildTokenURIData(tokenId string) string {
 	return selector + hex.EncodeToString(enc)
 }
 
-// BuildBalanceOfData: balanceOf(address) → 0x70a08231 + 32-byte left-padded address
+// BuildBalanceOfData balanceOf(address) → 0x70a08231 + 32-byte left-padded address
 func BuildBalanceOfData(addr string) string {
 	selector := "0x70a08231"
 	a := strings.ToLower(addr)
@@ -151,7 +151,7 @@ func BuildBalanceOfData(addr string) string {
 	return selector + hex.EncodeToString(enc)
 }
 
-// BuildTokenOfOwnerByIndexData: tokenOfOwnerByIndex(address,uint256) → 0x2f745c59 + encoded args
+// BuildTokenOfOwnerByIndexData tokenOfOwnerByIndex(address,uint256) → 0x2f745c59 + encoded args
 func BuildTokenOfOwnerByIndexData(owner string, index uint64) string {
 	selector := "0x2f745c59"
 	// ABI: two 32-byte words, owner (left-padded), index (left-padded)
@@ -165,7 +165,7 @@ func BuildTokenOfOwnerByIndexData(owner string, index uint64) string {
 	return selector + hex.EncodeToString(data)
 }
 
-// BuildSupportsInterfaceData: supportsInterface(bytes4) → 0x01ffc9a7 + 32-byte left-padded interfaceId
+// BuildSupportsInterfaceData supportsInterface(bytes4) → 0x01ffc9a7 + 32-byte left-padded interfaceId
 func BuildSupportsInterfaceData(ifaceHex4 string) string {
 	selector := "0x01ffc9a7"
 	id := strings.TrimPrefix(strings.ToLower(ifaceHex4), "0x")

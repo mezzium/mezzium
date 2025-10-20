@@ -2,6 +2,8 @@ route: /doge
 protocol: doge
 timeoutMs: 2500
 nodes:
+  - url: https://go.getblock.io/${GETBLOCK_IO_API_KEY}
+    priority: 1
 #  - url: https://dogecoin-mainnet.gateway.tatum.io
 #    priority: 3
 #    headers:

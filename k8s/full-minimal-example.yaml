@@ -20,10 +20,6 @@ spec:
           ports:
             - containerPort: 8080
           env:
-            - name: ALCHEMY_API_KEY
-              value: changeme
-            - name: TATUM_API_KEY
-              value: changeme
             - name: ADMIN_API_KEY
               value: changeme
             - name: SERVER_PORT

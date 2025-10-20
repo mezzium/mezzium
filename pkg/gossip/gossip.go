@@ -45,7 +45,7 @@ func Start(store *peers.Store, selfID string, logger *zap.Logger) {
 	}
 }
 
-// Inbound gossip handler
+// Handler Inbound gossip handler
 func Handler(store *peers.Store, logger *zap.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
